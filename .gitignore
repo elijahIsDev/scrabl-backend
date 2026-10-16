@@ -1,7 +1,18 @@
-node_modules/
+# Secrets — NEVER commit these
 .env
-.env.local
+.env.*
+*.env
+scrabl-service-account.json
+service-account*.json
+*.pem
+*.key
+
+# Dependencies & build
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# OS / editor
 .DS_Store
-*.log
-dist/
-build/
+Thumbs.db
+.vscode/

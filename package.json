@@ -1,22 +1,20 @@
 {
-  "name": "scrabl-backend",
+  "name": "scrabl",
   "version": "1.0.0",
-  "description": "Scrabl authentication backend",
+  "description": "Scrabl — Craft Influence. AI content tool that keeps creators sounding like themselves.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "claude": "^0.1.1",
+    "@google/generative-ai": "^0.21.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "google-auth-library": "^9.6.3",
-    "mongodb": "^7.5.0",
-    "mongoose": "^9.7.4",
-    "nodemailer": "^6.10.1",
-    "resend": "^6.12.4"
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^7.6.13",
+    "nodemailer": "^6.9.14"
   }
 }

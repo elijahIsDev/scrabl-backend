@@ -1,0 +1,224 @@
+/* =========================================================
+   SCRABL — LANDING STYLES  (Outfit · minimal)
+   Used by: index.html
+   Palette: near-black canvas, monochrome-forward, gold used sparingly
+   ========================================================= */
+
+:root{
+  --bg:#0A0A0B;
+  --text:#F4F4F5;
+  --muted:#86868B;
+  --faint:#5A5A5F;
+  --line:rgba(255,255,255,.07);
+  --line-2:rgba(255,255,255,.12);
+  --gold:#D4AF37;
+  --gold-soft:#E4C76A;
+  --radius:14px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Outfit',system-ui,sans-serif;
+  font-weight:300;
+  line-height:1.6;
+  letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+.accent{color:var(--gold)}
+
+
+/* ---------------- NAV ---------------- */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(10,10,11,.72);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+}
+nav .wrap{height:66px;display:flex;align-items:center;justify-content:space-between}
+
+.logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:1.2rem;letter-spacing:-.02em;text-decoration:none;color:var(--text)}
+.logo .mk{display:grid;place-items:center;color:var(--gold)}
+.logo .mk svg{width:21px;height:21px}
+
+.nav-right{display:flex;align-items:center;gap:26px}
+.nav-right a{color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:400;transition:color .2s}
+.nav-right a:hover{color:var(--text)}
+.nav-cta{color:var(--text)!important;border:1px solid var(--line-2);padding:8px 18px;border-radius:9px;transition:all .2s}
+.nav-cta:hover{border-color:var(--gold);color:var(--gold)!important}
+
+.burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px}
+.burger span{width:22px;height:2px;background:var(--text);border-radius:2px;transition:.3s}
+
+.mnav{position:fixed;inset:0;z-index:60;background:rgba(10,10,11,.97);backdrop-filter:blur(20px);display:none;flex-direction:column;justify-content:center;padding:0 10%;gap:6px}
+.mnav.open{display:flex}
+.mnav a{color:var(--text);text-decoration:none;font-size:1.5rem;font-weight:400;padding:18px 0;border-bottom:1px solid var(--line)}
+.mnav .x{position:absolute;top:22px;right:24px;font-size:1.8rem;color:var(--muted);cursor:pointer;background:none;border:none}
+
+
+/* ---------------- HERO ---------------- */
+.hero{padding:120px 0 84px;text-align:center}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);border:1px solid var(--line);border-radius:100px;padding:6px 14px;margin-bottom:34px}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.hero h1{font-size:clamp(2.4rem,5.6vw,3.9rem);font-weight:500;line-height:1.05;letter-spacing:-.035em;margin-bottom:24px}
+.hero .tag{color:var(--muted);font-size:1.08rem;font-weight:300;max-width:540px;margin:0 auto 40px;line-height:1.6}
+
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{padding:13px 26px;border-radius:10px;font-size:.95rem;font-weight:500;text-decoration:none;transition:all .2s;display:inline-block}
+.btn-gold{background:var(--gold);color:#111}
+.btn-gold:hover{background:var(--gold-soft);transform:translateY(-1px)}
+.btn-line{border:1px solid var(--line-2);color:var(--text)}
+.btn-line:hover{border-color:var(--muted)}
+
+/* shelf strip */
+.shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;max-width:820px;margin:72px auto 0}
+.slot{background:var(--bg);padding:22px 20px;min-height:128px;display:flex;flex-direction:column}
+.slot .meta{font-size:.68rem;color:var(--faint);letter-spacing:.04em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.slot .meta .d{width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.slot .body{font-size:.92rem;color:#D6D6D9;font-weight:300;line-height:1.5}
+.slot.empty{align-items:center;justify-content:center;text-align:center;color:var(--faint);font-size:.82rem}
+
+
+/* ---------------- SECTIONS (shared) ---------------- */
+section{padding:100px 0;border-top:1px solid var(--line)}
+.sec-head{max-width:640px;margin:0 auto 60px;text-align:center}
+.eyebrow{font-size:.74rem;color:var(--faint);letter-spacing:.16em;text-transform:uppercase;margin-bottom:18px}
+h2{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:500;letter-spacing:-.03em;line-height:1.12;margin-bottom:18px}
+.lede{color:var(--muted);font-size:1.02rem;font-weight:300}
+.mid{text-align:center}
+
+
+/* ---------------- PROBLEM GRID ---------------- */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.cell{background:var(--bg);padding:38px 34px;transition:background .25s}
+.cell:hover{background:rgba(255,255,255,.02)}
+.cell .num{font-size:.8rem;color:var(--faint);margin-bottom:22px;font-weight:400}
+.cell h3{font-size:1.12rem;font-weight:500;margin-bottom:10px;letter-spacing:-.02em}
+.cell p{color:var(--muted);font-size:.94rem;font-weight:300}
+.foot-line{text-align:center;margin-top:48px;font-size:1.15rem;font-weight:400}
+
+
+/* ---------------- HOW IT WORKS ---------------- */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:26px}
+.step .n{font-size:.78rem;color:var(--gold);font-weight:500;letter-spacing:.04em;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.step h3{font-size:1.02rem;font-weight:500;margin-bottom:9px;letter-spacing:-.02em}
+.step p{color:var(--muted);font-size:.9rem;font-weight:300}
+
+
+/* ---------------- VOICE (the one section) ---------------- */
+.voice .inner{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;max-width:1000px;margin:0 auto}
+.voice .eyebrow,.voice h2{text-align:left}
+.vpoints{list-style:none;margin-top:26px}
+.vpoints li{display:flex;gap:12px;align-items:flex-start;margin-bottom:15px;color:#CFCFD2;font-size:.95rem;font-weight:300}
+.vpoints li .c{color:var(--gold);flex-shrink:0;font-weight:500}
+.demo{border:1px solid var(--line-2);border-radius:18px;padding:30px}
+.demo .lbl{font-size:.68rem;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px}
+.demo .post{font-size:1.05rem;line-height:1.65;color:#ECECEE;font-weight:300}
+.demo .by{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-size:.8rem;color:var(--faint)}
+
+
+/* ---------------- TESTIMONIALS ---------------- */
+.testi{max-width:720px;margin:0 auto;text-align:center}
+.testi-quote{font-size:1.3rem;font-weight:300;line-height:1.5;color:var(--text);min-height:92px;transition:opacity .4s}
+.testi-by{margin-top:22px;font-size:.9rem;color:var(--muted)}
+.testi-by b{color:var(--text);font-weight:500}
+.testi-ctrls{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:34px}
+.testi-nav{width:40px;height:40px;border-radius:50%;border:1px solid var(--line-2);background:none;color:var(--text);cursor:pointer;font-size:1rem;transition:.2s}
+.testi-nav:hover{border-color:var(--gold);color:var(--gold)}
+.testi-dots{display:flex;gap:8px}
+.testi-dots button{width:7px;height:7px;border-radius:50%;border:none;background:var(--line-2);cursor:pointer;padding:0;transition:.2s}
+.testi-dots button.on{background:var(--gold);transform:scale(1.3)}
+
+
+/* ---------------- FAQ ---------------- */
+.faq-list{max-width:760px;margin:0 auto;border-top:1px solid var(--line)}
+details{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;padding:24px 4px;font-size:1.05rem;font-weight:400;display:flex;align-items:center;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary .pm{color:var(--gold);font-size:1.3rem;font-weight:300;transition:transform .2s;flex-shrink:0}
+details[open] summary .pm{transform:rotate(45deg)}
+details p{padding:0 4px 24px;color:var(--muted);font-size:.95rem;font-weight:300;max-width:620px}
+
+
+/* ---------------- FEEDBACK ---------------- */
+.fb{max-width:640px;margin:0 auto;border:1px solid var(--line);border-radius:18px;padding:40px}
+.fb-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.fb-field{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.fb-field label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--faint)}
+.fb input,.fb select,.fb textarea{background:rgba(255,255,255,.02);border:1px solid var(--line-2);border-radius:10px;padding:13px 15px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:300;transition:border-color .2s}
+.fb input:focus,.fb select:focus,.fb textarea:focus{outline:none;border-color:var(--gold)}
+.fb textarea{resize:vertical;min-height:120px}
+.fb .btn-gold{width:100%;border:none;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:4px}
+.fb-note{text-align:center;font-size:.82rem;color:var(--faint);margin-top:14px}
+.fb-success{text-align:center;padding:30px 0}
+.fb-success h3{font-size:1.5rem;font-weight:500;margin-bottom:10px}
+.fb-success p{color:var(--muted);font-weight:300}
+
+
+/* ---------------- FINAL CTA ---------------- */
+.final{text-align:center}
+.final h2{margin-bottom:16px}
+.final p{color:var(--muted);max-width:480px;margin:0 auto 32px;font-weight:300}
+
+
+/* ---------------- FOOTER ---------------- */
+footer{border-top:1px solid var(--line);padding:50px 0}
+footer .f-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px;width:100%}
+footer .fbrand{max-width:260px}
+footer .fbrand p{color:var(--muted);font-size:.86rem;font-weight:300;margin-top:14px}
+footer .cols{display:flex;gap:56px;flex-wrap:wrap}
+footer .col h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin-bottom:14px;font-weight:500}
+footer .col a{display:block;color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:300;margin-bottom:10px}
+footer .col a:hover{color:var(--text)}
+.f-legal{border-top:1px solid var(--line);margin-top:40px;padding-top:24px;color:var(--faint);font-size:.82rem;font-weight:300;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width:820px){
+  .nav-right .ln{display:none}
+  .burger{display:flex}
+  .shelf,.grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr 1fr;gap:22px}
+  .voice .inner{grid-template-columns:1fr;gap:34px}
+  .fb-row{grid-template-columns:1fr}
+  .fb{padding:28px 22px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+
+/* =========================================================
+   GRID BACKGROUND  (PXXL-style "box box") — hero + footer
+   Faint graph-paper grid, faded with a radial mask so it
+   never competes with the text.
+   ========================================================= */
+:root{ --grid:rgba(255,255,255,.045); }
+
+.hero{position:relative;overflow:hidden}
+.hero::before{
+  content:"";
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size:52px 52px;
+  -webkit-mask-image:radial-gradient(ellipse 65% 60% at 50% 38%, #000 0%, rgba(0,0,0,.4) 55%, transparent 80%);
+          mask-image:radial-gradient(ellipse 65% 60% at 50% 38%, #000 0%, rgba(0,0,0,.4) 55%, transparent 80%);
+}
+.hero .wrap{position:relative;z-index:1}
+
+footer{position:relative;overflow:hidden}
+footer::before{
+  content:"";
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size:52px 52px;
+  -webkit-mask-image:radial-gradient(ellipse 80% 120% at 50% 100%, #000 0%, transparent 72%);
+          mask-image:radial-gradient(ellipse 80% 120% at 50% 100%, #000 0%, transparent 72%);
+}
+footer .wrap{position:relative;z-index:1}

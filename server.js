@@ -16,7 +16,7 @@ const { sendWaitlistEmail, sendVerificationEmail, sendAdminNotification, sendFee
 const app = express();
 const PORT = process.env.PORT || 5500;
 
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Initialize Gemini client with API key
 let geminiClient = null;

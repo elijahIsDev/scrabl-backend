@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scrabl — Never run out of things to post</title>
+  <meta name="description" content="Scrabl keeps your shelf full of ready-to-post content, in your voice, so you show up every day without staring at a blank screen. Made in Akwa Ibom.">
+  <link rel="icon" type="image/png" href="images/leaf.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <nav>
+    <div class="wrap">
+      <a href="index.html" class="logo">
+        <span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></span>
+        scrabl
+      </a>
+      <div class="nav-right">
+        <a href="#how" class="ln">How it works</a>
+        <a href="#why" class="ln">Why Scrabl</a>
+        <a href="signup.html#login" class="ln">Log in</a>
+        <a href="signup.html" class="nav-cta">Sign up</a>
+        <div class="burger" onclick="openNav()"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- mobile nav overlay -->
+  <div class="mnav" id="mnav">
+    <button class="x" onclick="closeNav()">&times;</button>
+    <a href="#how" onclick="closeNav()">How it works</a>
+    <a href="#why" onclick="closeNav()">Why Scrabl</a>
+    <a href="#faq" onclick="closeNav()">FAQ</a>
+    <a href="signup.html#login">Log in</a>
+    <a href="signup.html">Sign up</a>
+  </div>
+
+  <!-- ===================== HERO ===================== -->
+  <header class="hero">
+    <div class="wrap">
+      <span class="pill"><span class="dot"></span> Now in early access</span>
+      <h1>Never run out of<br>things to post<span class="accent">.</span></h1>
+      <p class="tag">Scrabl keeps your shelf full of ready-to-post content — so you show up every day without staring at a blank screen.</p>
+      <div class="actions">
+        <a href="signup.html" class="btn btn-gold">Get started free</a>
+        <a href="#how" class="btn btn-line">See how it works</a>
+      </div>
+      <div class="shelf">
+        <div class="slot">
+          <div class="meta"><span class="d"></span>X · ready</div>
+          <div class="body">"almost deleted the whole repo at 2am. today it works. we move 🔧"</div>
+        </div>
+        <div class="slot">
+          <div class="meta"><span class="d"></span>Instagram · ready</div>
+          <div class="body">"nobody tells you how much of building is just refusing to quit."</div>
+        </div>
+        <div class="slot empty">Scrabl refills your shelf —<br>it never runs empty</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== PROBLEM ===================== -->
+  <section id="problem">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow">The real problem</div>
+        <h2>Posting once is easy. Posting every day is what breaks you<span class="accent">.</span></h2>
+        <p class="lede">The grind was never making one good post. It's showing up again tomorrow — and the day after.</p>
+      </div>
+      <div class="grid">
+        <div class="cell"><div class="num">01</div><h3>The blank-screen freeze</h3><p>You sit down to post and… nothing. The hardest part of every day is just deciding what to say.</p></div>
+        <div class="cell"><div class="num">02</div><h3>Consistency is brutal</h3><p>The algorithm rewards showing up daily. But nobody has 30 fresh ideas a week, every week.</p></div>
+        <div class="cell"><div class="num">03</div><h3>Burnout is real</h3><p>Running your whole content calendar alone drains you. Most creators quit from exhaustion, not talent.</p></div>
+        <div class="cell"><div class="num">04</div><h3>Starting from zero, daily</h3><p>Every post begins from a blank page. Nothing remembers your ideas or what worked.</p></div>
+      </div>
+      <p class="foot-line">Scrabl was built so you never face the blank screen again<span class="accent">.</span></p>
+    </div>
+  </section>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow">How it works</div>
+        <h2>Your shelf is always full<span class="accent">.</span></h2>
+        <p class="lede">A running shelf of ready-to-post content — from your ideas, your niche, what's working. Open it, pick one, post.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="n">STEP 1</div><h3>Drop a thought</h3><p>An idea in the shower, a voice note on the road — catch it before it's gone.</p></div>
+        <div class="step"><div class="n">STEP 2</div><h3>Scrabl stocks it</h3><p>Raw thoughts become ready-to-post content. The shelf keeps refilling.</p></div>
+        <div class="step"><div class="n">STEP 3</div><h3>Pick one, post</h3><p>No blank screen, no overthinking. Your next post is already waiting.</p></div>
+        <div class="step"><div class="n">STEP 4</div><h3>Keep the streak</h3><p>Showing up daily stops taking willpower. The habit builds itself.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== VOICE (the one section) ===================== -->
+  <section id="why" class="voice">
+    <div class="wrap">
+      <div class="inner">
+        <div>
+          <div class="eyebrow">The catch</div>
+          <h2>And it still sounds exactly like you<span class="accent">.</span></h2>
+          <p class="lede">What makes Scrabl different from every "post more" tool: everything on your shelf is written in your voice. Daily, consistent content that never reads like a robot.</p>
+          <ul class="vpoints">
+            <li><span class="c">—</span> Learns your slang, rhythm and energy from your own posts</li>
+            <li><span class="c">—</span> Gets sharper every time you use it. Yours, and only yours</li>
+            <li><span class="c">—</span> Native to each platform, never copy-pasted everywhere</li>
+          </ul>
+        </div>
+        <div class="demo">
+          <div class="lbl">written in your voice</div>
+          <div class="post">"spent 3 days fighting this login system. 2am, almost gave up twice. today it finally works. no tutorial saved me — just me and the errors. we move 🔧"</div>
+          <div class="by">sounds like you — not a robot</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BUILT FOR YOU ===================== -->
+  <section class="mid">
+    <div class="wrap">
+      <div class="eyebrow">Built for creators like you</div>
+      <h2>Made in Akwa Ibom. For creators here first<span class="accent">.</span></h2>
+      <p class="lede" style="max-width:560px;margin:0 auto">Scrabl understands how we actually talk — the slang, the culture, the rhythm — instead of treating Africa like an afterthought.</p>
+    </div>
+  </section>
+
+  <!-- ===================== BEFORE WE LAUNCH ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow">Before we launch</div>
+        <h2>What people are saying before we<br>even open the doors<span class="accent">.</span></h2>
+      </div>
+      <div class="testi">
+        <p class="testi-quote" id="tq">“First thing… the idea is solid. The pain point is real and the positioning makes sense.”</p>
+        <p class="testi-by" id="tb"><b>Mr. Jhano Paul</b> · Developer</p>
+        <div class="testi-ctrls">
+          <button class="testi-nav" id="tprev" aria-label="Previous">&larr;</button>
+          <div class="testi-dots" id="tdots"></div>
+          <button class="testi-nav" id="tnext" aria-label="Next">&rarr;</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow">Support</div>
+        <h2>Questions, answered<span class="accent">.</span></h2>
+      </div>
+      <div class="faq-list">
+        <details open>
+          <summary>How does Scrabl keep my shelf full?<span class="pm">+</span></summary>
+          <p>It turns your ideas, your niche, and what's already working into ready-to-post content — then keeps refilling the shelf so you never run out.</p>
+        </details>
+        <details>
+          <summary>What if I run out of ideas?<span class="pm">+</span></summary>
+          <p>That's the whole point — you don't have to bring fresh ideas every day. Scrabl keeps the shelf stocked even on the days you're completely tapped out.</p>
+        </details>
+        <details>
+          <summary>Will my posts still sound like me?<span class="pm">+</span></summary>
+          <p>Yes. Everything is written in your voice — your slang, your rhythm, your energy — through Voice DNA, which gets sharper the more you use it. Consistent, but never robotic.</p>
+        </details>
+        <details>
+          <summary>Do I have to post every day?<span class="pm">+</span></summary>
+          <p>No. Scrabl makes daily posting effortless if that's your goal, but you move at your own rhythm. The full shelf is always there when you're ready.</p>
+        </details>
+        <details>
+          <summary>Which platforms does it write for?<span class="pm">+</span></summary>
+          <p>X, Instagram, TikTok, LinkedIn and YouTube — each one written native to how that platform actually works, not the same text pasted everywhere.</p>
+        </details>
+        <details>
+          <summary>Is Scrabl built for African creators?<span class="pm">+</span></summary>
+          <p>Yes, specifically. Made in Akwa Ibom, for creators here first — it understands our slang, our culture and our rhythm instead of treating Africa as an afterthought.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEEDBACK ===================== -->
+  <section id="feedback">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow">Community</div>
+        <h2>Tell us what Scrabl should do next<span class="accent">.</span></h2>
+        <p class="lede">We're building this with creators, not just for them. Every note shapes the roadmap.</p>
+      </div>
+      <div class="fb" id="fb-wrap">
+        <form id="creator-feedback-form">
+          <div class="fb-row">
+            <div class="fb-field"><label>Full name</label><input type="text" id="fb-name" placeholder="Your name" required></div>
+            <div class="fb-field"><label>Email</label><input type="email" id="fb-email" placeholder="you@email.com" required></div>
+          </div>
+          <div class="fb-field">
+            <label>Category</label>
+            <select id="fb-category" required>
+              <option value="" disabled selected>Select one</option>
+              <option value="feature">Feature request</option>
+              <option value="bug">Bug report</option>
+              <option value="ui">UI / design</option>
+              <option value="other">General feedback</option>
+            </select>
+          </div>
+          <div class="fb-field"><label>Message</label><textarea id="fb-message" placeholder="What's on your mind?" required></textarea></div>
+          <input type="hidden" id="rating-input" value="0">
+          <button type="submit" class="btn btn-gold">Send feedback</button>
+          <p class="fb-note" id="fb-msg">We read every submission to shape the Scrabl roadmap.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FINAL CTA ===================== -->
+  <section class="final">
+    <div class="wrap">
+      <h2>Never run dry again<span class="accent">.</span></h2>
+      <p>Stay consistent, keep your voice, never face a blank screen. Get in while Scrabl is opening its doors.</p>
+      <a href="signup.html" class="btn btn-gold">Get started free</a>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <div class="wrap">
+      <div class="f-top">
+        <div class="fbrand">
+          <a href="index.html" class="logo">
+            <span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></span>
+            scrabl
+          </a>
+          <p>Never run out of things to post. Made in Akwa Ibom, for creators everywhere.</p>
+        </div>
+        <div class="cols">
+          <div class="col"><h4>Product</h4><a href="#how">How it works</a><a href="#why">Why Scrabl</a><a href="signup.html">Sign up</a></div>
+          <div class="col"><h4>Resources</h4><a href="blog.html">Blog</a><a href="help.html">Help</a><a href="privacy.html">Privacy</a></div>
+          <div class="col"><h4>Company</h4><a href="about.html">About</a><a href="terms.html">Terms</a><a href="signup.html#login">Log in</a></div>
+        </div>
+      </div>
+      <div class="f-legal"><span>© 2026 Scrabl · Craft Influence</span><span>#scrabl26</span></div>
+    </div>
+  </footer>
+
+  <script src="landing.js" defer></script>
+</body>
+</html>

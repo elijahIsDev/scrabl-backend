@@ -340,9 +340,9 @@
           return;
         }
         note.textContent = '';
-        this.reset();
-        setHint('li-email-hint',''); setHint('li-password-hint','');
-        btn.disabled = false; btn.textContent = originalText;
+        btn.textContent = 'Welcome back ✓';
+        window.location.href = 'app.html';
+        return;
       } else {
         note.style.color = 'var(--error)';
         note.textContent = data.error || 'Could not log you in. Please try again.';
@@ -430,7 +430,7 @@
       var data = await res.json().catch(function(){ return {}; });
       if (res.ok){
         if (data.onboarded === true){
-          window.location.href = 'index.html';
+          window.location.href = 'app.html';
         } else {
           btn.textContent = 'Verified ✓';
           window.location.href = 'onboarding.html';

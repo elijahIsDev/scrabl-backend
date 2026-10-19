@@ -843,7 +843,7 @@ function buildGenerationPrompt(input, platforms, user) {
         if (dna.signaturePhrases && dna.signaturePhrases.length) parts.push(`- Signature phrases: ${dna.signaturePhrases.join(', ')}`);
         if (dna.do && dna.do.length) parts.push(`- DO: ${dna.do.join('; ')}`);
         if (dna.dont && dna.dont.length) parts.push(`- DO NOT: ${dna.dont.join('; ')}`);
-        voiceBlock = `Use these voice notes ONLY for flavour (slang, emoji habits, vibe) — never to make it formal:\n${parts.join('\n')}\n(If any note above sounds corporate, analytical, or formal, IGNORE it. The post must still sound like a real person talking.)`;
+        voiceBlock = `Write in the creator's OWN voice, taken from their onboarding voice sample below. Match their vocabulary level, tone, rhythm, slang and emoji habits so the post sounds like THEY personally wrote it:\n${parts.join('\n')}\nReflect this voice closely — but keep it natural and human. Rich or "big English" vocabulary is good IF that's how they write; just never let it turn into a stiff press release, corporate-speak, or an explanation of the topic.`;
     } else {
         voiceBlock = `Write in a natural, human, casual voice suited to an African (Nigerian) creator. Avoid robotic or corporate phrasing.`;
     }
@@ -929,7 +929,7 @@ ABSOLUTE RULES — breaking any of these means you failed:
 4. The raw idea is your REFERENCE, not a script. Transform it into a natural, ready-to-post version — expand it, add relatable texture, let it breathe and flow comfortably. Just keep it TRUE to the creator's actual intent and feeling: don't flip their take, don't invent facts that contradict them, and never drift into explaining or teaching the topic.
 5. NEVER use corporate, academic, analytical, marketing, or AI-sounding language. These are BANNED (and anything like them): "internal review", "consumption patterns", "dietary", "optimization", "optimal", "protocol", "parameters", "metrics", "efficiency", "S-tier", "leverage", "utilize", "implement", "initiative", "in today's world", "dive into", "elevate", "unlock", "game-changer", "it's important to", "when it comes to", "well-being objectives".
 6. Keep the creator's actual feeling and opinion. Never flip or soften their take into advice.
-7. If the creator's voice notes sound formal, corporate, or analytical, IGNORE that part — the post must still sound like a real person talking.
+7. SHAPE the post from the creator's voice sample (their vocabulary, tone, rhythm, slang, emoji) so it genuinely sounds like THEY wrote it — while always keeping it natural and human. "Big English" / rich vocabulary is welcome when that matches their voice; corporate-speak, AI-slop, and explaining are never welcome, no matter what.
 
 Before you answer, ask yourself: "Would a real 20-something actually text or post this?" If it sounds like a report, a brand, a LinkedIn bio, or a robot — it is WRONG. Rewrite it until it sounds like a person.
 

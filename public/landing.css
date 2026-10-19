@@ -222,3 +222,11 @@ footer::before{
           mask-image:radial-gradient(ellipse 80% 120% at 50% 100%, #000 0%, transparent 72%);
 }
 footer .wrap{position:relative;z-index:1}
+
+
+/* ===== custom scrollbar — Scrabl dark/gold ===== */
+*{scrollbar-width:thin;scrollbar-color:#2e2e34 transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2e2e34;border-radius:8px;border:2px solid #0A0A0B}
+::-webkit-scrollbar-thumb:hover{background:#D4AF37}

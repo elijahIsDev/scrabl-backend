@@ -304,6 +304,11 @@
     var first = name.split(' ')[0];
     var handle = '@' + (email ? email.split('@')[0] : first).toLowerCase().replace(/[^a-z0-9._]/g,'');
 
+    // Per-account history key, so switching accounts on one browser never shows
+    // another account's posts. Also drop the old shared key that caused the bleed.
+    var recentKey = 'scrabl_recent::' + (email || 'anon');
+    try { localStorage.removeItem('scrabl_recent'); } catch(_){}
+
     document.getElementById('pn').textContent = name;
     document.getElementById('pe').textContent = handle;
     document.getElementById('av').textContent = (first[0]||'S').toUpperCase();
@@ -520,10 +525,12 @@
     }
 
     // ----- recent + voice meter -----
-    function getRecent(){ try{ return JSON.parse(localStorage.getItem('scrabl_recent')||'[]'); }catch(_){ return []; } }
+    // Recent history is scoped PER ACCOUNT (by email) so one browser never bleeds
+    // one user's history into another's. recentKey is defined up top near `email`.
+    function getRecent(){ try{ return JSON.parse(localStorage.getItem(recentKey)||'[]'); }catch(_){ return []; } }
     function saveRecent(input, results){
       var list=getRecent(); list.unshift({ input:input, results:results, ts:Date.now() }); list=list.slice(0,8);
-      try{ localStorage.setItem('scrabl_recent', JSON.stringify(list)); }catch(_){}
+      try{ localStorage.setItem(recentKey, JSON.stringify(list)); }catch(_){}
       renderRecent(); updateVoice();
     }
     function renderRecent(){
@@ -538,32 +545,62 @@
       });
     }
     function timeAgo(ts){ var s=Math.floor((Date.now()-ts)/1000); if(s<60)return 'just now'; var m=Math.floor(s/60); if(m<60)return m+'m ago'; var h=Math.floor(m/60); if(h<24)return h+'h ago'; return Math.floor(h/24)+'d ago'; }
+    // ME = this account's server-side data (profile + voiceDNA). Loaded on boot so
+    // voice works on ANY device, not just the browser where the user onboarded.
+    var ME=null, hasVoiceDNA=false;
+    function pretty(k){ return k.replace(/[_-]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }
     function updateVoice(){
-      var hasProfile=false; try{ hasProfile=!!localStorage.getItem('scrabl_onboarding'); }catch(_){}
-      var pct=Math.min(96,(hasProfile?62:35)+getRecent().length*4);
+      var pct=Math.min(96,(hasVoiceDNA?70:30)+getRecent().length*4);
       document.getElementById('voicePct').textContent=pct+'%';
       document.getElementById('voiceFill').style.width=pct+'%';
     }
-    renderRecent(); updateVoice();
-
-    // ----- my voice -----
-    (function(){
-      var vb=document.getElementById('voiceBody'), prof={};
-      try{ prof=JSON.parse(localStorage.getItem('scrabl_onboarding')||'{}'); }catch(_){}
-      var keys=Object.keys(prof||{});
-      if(!keys.length){ vb.innerHTML='<div class="empty">No voice profile found on this device yet. Run your voice setup so Scrabl learns how you sound.</div>'; return; }
-      var html='';
-      keys.forEach(function(k){
-        var v=prof[k]; if(v==null||v==='')return;
-        if(typeof v==='object') v=Array.isArray(v)?v.join(', '):JSON.stringify(v);
-        html+='<div class="info"><div class="il">'+esc(pretty(k))+'</div><div class="iv">'+esc(String(v))+'</div></div>';
-      });
-      vb.innerHTML=html||'<div class="empty">Your voice profile is set.</div>';
-    })();
-    function pretty(k){ return k.replace(/[_-]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }
+    function renderVoice(){
+      var vb=document.getElementById('voiceBody');
+      var dna = ME && ME.voiceDNA;
+      if(dna && (dna.voiceSummary || dna.tone)){
+        hasVoiceDNA=true;
+        var rows=[];
+        var add=function(label,val){ if(val==null||val==='')return; if(typeof val==='object') val=Array.isArray(val)?val.join(', '):JSON.stringify(val); rows.push('<div class="info"><div class="il">'+esc(label)+'</div><div class="iv">'+esc(String(val))+'</div></div>'); };
+        add('How you write', dna.voiceSummary);
+        add('Tone', dna.tone);
+        add('Formality', dna.formality);
+        add('Sentence style', dna.sentenceStyle);
+        add('Capitalization', dna.capitalization);
+        add('Emoji use', dna.emojiUsage);
+        add('Signature phrases', dna.signaturePhrases);
+        add('Slang level', dna.slangLevel);
+        vb.innerHTML=rows.join('')||'<div class="empty">Your voice profile is set.</div>';
+        return;
+      }
+      hasVoiceDNA=false;
+      var hasSamples = ME && ME.profile && Array.isArray(ME.profile.voiceSamples) && ME.profile.voiceSamples.filter(Boolean).length>=2;
+      vb.innerHTML='<div class="empty">'+(hasSamples
+        ? 'Your voice hasn’t been analyzed yet. Tap “Redo my voice setup” below so Scrabl can learn how you sound.'
+        : 'No voice profile on your account yet. Run your voice setup so Scrabl writes in <b>your</b> voice — until then it writes in plain English.')+'</div>';
+    }
+    function loadMe(){
+      fetch(backendBase+'/api/me',{headers:{'Authorization':'Bearer '+token}})
+        .then(function(r){ return r.ok?r.json():null; })
+        .then(function(d){
+          if(d && d.success){
+            ME=d;
+            if(d.name){ var f=d.name.split(' ')[0]; document.getElementById('pn').textContent=d.name; document.getElementById('setName').textContent=d.name; document.getElementById('av').textContent=(f[0]||'S').toUpperCase(); document.getElementById('greet').innerHTML='Hey '+esc(f)+'<span class="g">.</span>'; }
+            if(d.email){ document.getElementById('setEmail').textContent=d.email; document.getElementById('pe').textContent='@'+d.email.split('@')[0].toLowerCase().replace(/[^a-z0-9._]/g,''); }
+          }
+        })
+        .catch(function(){})
+        .then(function(){ renderVoice(); updateVoice(); });
+    }
+    renderRecent(); updateVoice(); renderVoice(); loadMe();
 
     document.getElementById('logoutBtn').addEventListener('click', function(){
-      try{ localStorage.removeItem('scrabl_token'); localStorage.removeItem('scrabl_user'); }catch(_){}
+      try{
+        localStorage.removeItem('scrabl_token');
+        localStorage.removeItem('scrabl_user');
+        localStorage.removeItem(recentKey);
+        localStorage.removeItem('scrabl_recent');
+        localStorage.removeItem('scrabl_onboarding');
+      }catch(_){}
       location.href='index.html';
     });
 

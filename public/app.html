@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Cropper.js: lets users crop an uploaded screenshot to its focus point before generating -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
   <style>
     :root{
       --bg:#0A0A0B; --panel:rgba(255,255,255,.025); --panel-2:rgba(255,255,255,.04);
@@ -63,9 +66,15 @@
 
     .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
     label.fld{display:block;font-size:.76rem;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
-    textarea,input[type=text]{width:100%;background:rgba(0,0,0,.25);border:1px solid var(--line-2);border-radius:11px;color:var(--text);font-family:inherit;font-size:1rem;font-weight:300;padding:14px 16px;resize:vertical;transition:border-color .15s}
+    textarea,input[type=text]{width:100%;background:rgba(0,0,0,.25);border:1px solid var(--line-2);border-radius:11px;color:var(--text);font-family:inherit;font-size:1rem;font-weight:300;padding:14px 16px;resize:none;transition:border-color .15s}
     textarea:focus,input:focus{outline:none;border-color:var(--gold)}
     textarea{min-height:110px;line-height:1.6}
+    /* custom scrollbar — matches the dark/gold theme, not the default browser one */
+    *{scrollbar-width:thin;scrollbar-color:#2e2e34 transparent}
+    ::-webkit-scrollbar{width:10px;height:10px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:#2e2e34;border-radius:8px;border:2px solid var(--bg,#0A0A0B)}
+    ::-webkit-scrollbar-thumb:hover{background:var(--gold,#D4AF37)}
 
     .plats{display:flex;flex-wrap:wrap;gap:9px;margin-top:6px}
     .plat{border:1px solid var(--line-2);background:transparent;color:var(--muted);border-radius:30px;padding:8px 16px;font-size:.88rem;font-weight:400;transition:.15s}
@@ -190,8 +199,38 @@
         <h1>Make something<span class="g">.</span></h1>
         <p class="sub">One idea in. Post-ready content out — in your voice, shaped for each platform.</p>
         <div class="card" style="margin-top:24px">
-          <label class="fld" for="idea">Your idea</label>
-          <textarea id="idea" placeholder="Type a raw thought, a topic, or paste a rough note…"></textarea>
+          <!-- mode toggle -->
+          <div id="modeSeg" style="display:inline-flex;background:#141416;border:1px solid #26262b;border-radius:12px;padding:4px;gap:4px;margin-bottom:18px">
+            <button type="button" id="mTextBtn" style="border:0;background:#D4AF37;color:#0A0A0B;font-family:inherit;font-weight:600;font-size:.85rem;padding:8px 15px;border-radius:9px;cursor:pointer;transition:all .15s">Type an idea</button>
+            <button type="button" id="mShotBtn" style="border:0;background:transparent;color:#8a8a93;font-family:inherit;font-weight:600;font-size:.85rem;padding:8px 15px;border-radius:9px;cursor:pointer;transition:all .15s">Screenshot-to-Post</button>
+          </div>
+
+          <!-- TEXT mode -->
+          <div id="modeText">
+            <label class="fld" for="idea">Your idea</label>
+            <textarea id="idea" placeholder="Type a raw thought, a topic, or paste a rough note…"></textarea>
+          </div>
+
+          <!-- SCREENSHOT mode -->
+          <div id="modeShot" style="display:none">
+            <label class="fld">Upload a screenshot of a post you like</label>
+            <label for="shotFile" id="shotDrop" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;border:1.5px dashed #33333a;border-radius:14px;background:#111113;cursor:pointer;padding:20px;text-align:center">
+              <input type="file" id="shotFile" accept="image/*" style="display:none">
+              <div id="shotEmpty">
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#6b6b73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                <div style="color:#e8e8ea;font-weight:600">Tap to upload a tweet / post screenshot</div>
+                <div style="font-size:.82rem;margin-top:4px;color:#8a8a93">Scrabl reads it and rewrites it in your voice</div>
+              </div>
+              <img id="shotPreview" alt="" style="display:none;max-width:100%;max-height:260px;border-radius:10px">
+            </label>
+            <div id="shotTools" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap">
+              <button type="button" id="shotCropBtn" style="display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid #33333a;color:#D4AF37;font-family:inherit;font-size:.8rem;padding:6px 12px;border-radius:8px;cursor:pointer"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>Crop to focus</button>
+              <button type="button" id="shotRemoveBtn" style="background:transparent;border:1px solid #33333a;color:#8a8a93;font-family:inherit;font-size:.8rem;padding:6px 12px;border-radius:8px;cursor:pointer">Remove image</button>
+            </div>
+            <label class="fld" for="shotNote" style="margin-top:18px">Add a note to steer it <span style="color:var(--faint);font-weight:400">(optional)</span></label>
+            <textarea id="shotNote" placeholder="e.g. make it funnier, keep it short, add my own spin…"></textarea>
+          </div>
+
           <label class="fld" style="margin-top:20px">Platforms</label>
           <div class="plats" id="plats"></div>
           <div style="margin-top:22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -201,6 +240,20 @@
           <div class="note" id="genNote"></div>
         </div>
         <div id="genArea"></div>
+
+        <!-- crop editor modal -->
+        <div id="cropModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.82);align-items:center;justify-content:center;padding:18px">
+          <div style="background:#141416;border:1px solid #26262b;border-radius:16px;padding:18px;max-width:560px;width:100%;max-height:90vh;display:flex;flex-direction:column;gap:14px">
+            <div style="color:#e8e8ea;font-weight:600">Crop to the post you want</div>
+            <div style="flex:1;min-height:0;overflow:hidden;border-radius:10px;background:#0A0A0B">
+              <img id="cropImg" alt="" style="max-width:100%;display:block">
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end">
+              <button type="button" id="cropCancel" style="background:transparent;border:1px solid #33333a;color:#8a8a93;font-family:inherit;font-weight:600;font-size:.85rem;padding:9px 16px;border-radius:9px;cursor:pointer">Cancel</button>
+              <button type="button" id="cropApply" style="background:#D4AF37;border:0;color:#0A0A0B;font-family:inherit;font-weight:600;font-size:.85rem;padding:9px 18px;border-radius:9px;cursor:pointer">Apply crop</button>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- MY VOICE -->
@@ -310,24 +363,92 @@
       goStudio();
     });
 
+    // ----- mode toggle (Type an idea  /  Screenshot-to-Post) -----
+    var genMode='text', shotDataUrl=null, shotMime='';
+    var mTextBtn=document.getElementById('mTextBtn'), mShotBtn=document.getElementById('mShotBtn');
+    var modeText=document.getElementById('modeText'), modeShot=document.getElementById('modeShot');
+    var shotFile=document.getElementById('shotFile'), shotPreview=document.getElementById('shotPreview');
+    var shotEmpty=document.getElementById('shotEmpty'), shotTools=document.getElementById('shotTools');
+    function setMode(m){
+      genMode=m;
+      var on=(m==='text');
+      mTextBtn.style.background=on?'#D4AF37':'transparent'; mTextBtn.style.color=on?'#0A0A0B':'#8a8a93';
+      mShotBtn.style.background=on?'transparent':'#D4AF37'; mShotBtn.style.color=on?'#8a8a93':'#0A0A0B';
+      modeText.style.display=on?'':'none'; modeShot.style.display=on?'none':'';
+      if(note){ note.className='note'; note.textContent=''; }
+    }
+    mTextBtn.addEventListener('click',function(){ setMode('text'); });
+    mShotBtn.addEventListener('click',function(){ setMode('screenshot'); });
+    shotFile.addEventListener('change',function(){
+      var f=shotFile.files && shotFile.files[0]; if(!f) return;
+      if(f.size > 10*1024*1024){ note.className='note err'; note.textContent='That image is too big (max 10MB). Try a smaller screenshot.'; return; }
+      var reader=new FileReader();
+      reader.onload=function(){
+        shotDataUrl=reader.result; shotMime=f.type||'image/png';
+        shotPreview.src=shotDataUrl; shotPreview.style.display='block';
+        shotEmpty.style.display='none'; shotTools.style.display='flex';
+      };
+      reader.readAsDataURL(f);
+    });
+    document.getElementById('shotRemoveBtn').addEventListener('click',function(e){
+      e.preventDefault();
+      shotDataUrl=null; shotMime=''; shotFile.value='';
+      shotPreview.style.display='none'; shotPreview.src='';
+      shotEmpty.style.display='block'; shotTools.style.display='none';
+    });
+
+    // ----- crop editor (Cropper.js) -----
+    var cropModal=document.getElementById('cropModal'), cropImg=document.getElementById('cropImg'), cropper=null;
+    document.getElementById('shotCropBtn').addEventListener('click',function(e){
+      e.preventDefault();
+      if(!shotDataUrl) return;
+      if(typeof Cropper==='undefined'){ note.className='note err'; note.textContent='Crop tool still loading — check your connection and try again.'; return; }
+      cropImg.src=shotDataUrl;
+      cropModal.style.display='flex';
+      if(cropper){ cropper.destroy(); cropper=null; }
+      cropper=new Cropper(cropImg,{ viewMode:1, autoCropArea:0.9, background:false, responsive:true });
+    });
+    function closeCrop(){ if(cropper){ cropper.destroy(); cropper=null; } cropModal.style.display='none'; }
+    document.getElementById('cropCancel').addEventListener('click',function(e){ e.preventDefault(); closeCrop(); });
+    document.getElementById('cropApply').addEventListener('click',function(e){
+      e.preventDefault();
+      if(!cropper) return closeCrop();
+      var canvas=cropper.getCroppedCanvas({ maxWidth:1600, maxHeight:1600 });
+      if(canvas){
+        var mime=(shotMime==='image/png')?'image/png':'image/jpeg';
+        shotDataUrl=canvas.toDataURL(mime, 0.92); shotMime=mime;
+        shotPreview.src=shotDataUrl;
+      }
+      closeCrop();
+    });
+
     // ----- generate -----
     var genBtn=document.getElementById('genBtn'), note=document.getElementById('genNote'), area=document.getElementById('genArea');
     genBtn.addEventListener('click', generate);
     function generate(){
-      var input=document.getElementById('idea').value.trim();
       var platforms=Object.keys(selected).filter(function(k){return selected[k];});
       note.className='note'; note.textContent='';
-      if(!input){ note.className='note err'; note.textContent='Type an idea first.'; return; }
+      var isShot=(genMode==='screenshot');
+      var input=isShot
+        ? document.getElementById('shotNote').value.trim()
+        : document.getElementById('idea').value.trim();
+      // what we show in Recent + what we feed the request
+      var recentLabel = isShot ? (input ? 'Screenshot · '+input : 'Screenshot post') : input;
+      if(!isShot && !input){ note.className='note err'; note.textContent='Type an idea first.'; return; }
+      if(isShot && !shotDataUrl){ note.className='note err'; note.textContent='Upload a screenshot first.'; return; }
       if(platforms.length===0){ note.className='note err'; note.textContent='Pick at least one platform.'; return; }
       genBtn.disabled=true; genBtn.textContent='Generating…';
       area.innerHTML=loadingHTML(platforms.length);
+
+      var payload={ input:input, platforms:platforms };
+      if(isShot){ payload.image=shotDataUrl; payload.imageMimeType=shotMime; }
 
       var MAX_TRIES=4;        // retry transient overloads so the user never sees a hard fail
       function attempt(n){
         fetch(backendBase+'/api/generate', {
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-          body:JSON.stringify({ input:input, platforms:platforms })
+          body:JSON.stringify(payload)
         })
         .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,status:r.status,d:d}; }, function(){ return {ok:r.ok,status:r.status,d:null}; }); })
         .then(function(res){
@@ -345,8 +466,8 @@
             note.textContent=(res.d&&res.d.error)||'Could not generate just now — give it a few seconds and tap Generate again.';
             return;
           }
-          renderResults(res.d.results, input);
-          saveRecent(input, res.d.results);
+          renderResults(res.d.results, recentLabel);
+          saveRecent(recentLabel, res.d.results);
         })
         .catch(function(){
           // Network blip → also retry a couple of times before giving up.

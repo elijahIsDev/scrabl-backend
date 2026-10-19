@@ -722,6 +722,33 @@ app.post('/api/onboarding', async (req, res) => {
     }
 });
 
+// Return the logged-in user's account data (profile + voice DNA) so the app can
+// load their voice on ANY device, not just the browser where they onboarded.
+app.get('/api/me', async (req, res) => {
+    try {
+        const auth = req.headers.authorization || '';
+        const token = auth.startsWith('Bearer ') ? auth.slice(7) : (req.query?.token || '');
+        const payload = verifyToken(token);
+        if (!payload) return res.status(401).json({ error: 'Please log in again.' });
+
+        const user = await User.findById(payload.id);
+        if (!user) return res.status(404).json({ error: 'Account not found.' });
+
+        return res.status(200).json({
+            success: true,
+            email: user.email,
+            name: user.name || '',
+            onboarded: !!user.onboarded,
+            profile: user.profile || {},
+            voiceDNA: user.voiceDNA || null,
+            voiceDNAUpdatedAt: user.voiceDNAUpdatedAt || null
+        });
+    } catch (err) {
+        console.error('Me error:', err);
+        return res.status(500).json({ error: 'Could not load your account.' });
+    }
+});
+
 // ========== VOICE DNA: analyze samples into a stored voice profile ==========
 
 // Build the analysis prompt from a creator's samples + light context
@@ -846,7 +873,7 @@ function buildGenerationPrompt(input, platforms, user, mode) {
         if (dna.dont && dna.dont.length) parts.push(`- DO NOT: ${dna.dont.join('; ')}`);
         voiceBlock = `Write in the creator's OWN voice, taken from their onboarding voice sample below. Match their vocabulary level, tone, rhythm, slang and emoji habits so the post sounds like THEY personally wrote it:\n${parts.join('\n')}\nReflect this voice closely — but keep it natural and human. Rich or "big English" vocabulary is good IF that's how they write; just never let it turn into a stiff press release, corporate-speak, or an explanation of the topic.`;
     } else {
-        voiceBlock = `Write in a natural, human, casual voice suited to an African (Nigerian) creator. Avoid robotic or corporate phrasing.`;
+        voiceBlock = `This creator has not set up a voice profile yet, so write in clean, natural, everyday English — simple, human, and neutral. Do NOT default to Pidgin or heavy slang; only mirror the exact style the creator's own input shows.`;
     }
 
     const platformInstructions = platforms.map(function (p) {

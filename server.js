@@ -843,7 +843,7 @@ function buildGenerationPrompt(input, platforms, user) {
         if (dna.signaturePhrases && dna.signaturePhrases.length) parts.push(`- Signature phrases: ${dna.signaturePhrases.join(', ')}`);
         if (dna.do && dna.do.length) parts.push(`- DO: ${dna.do.join('; ')}`);
         if (dna.dont && dna.dont.length) parts.push(`- DO NOT: ${dna.dont.join('; ')}`);
-        voiceBlock = `Write in THIS creator's exact voice:\n${parts.join('\n')}`;
+        voiceBlock = `Use these voice notes ONLY for flavour (slang, emoji habits, vibe) — never to make it formal:\n${parts.join('\n')}\n(If any note above sounds corporate, analytical, or formal, IGNORE it. The post must still sound like a real person talking.)`;
     } else {
         voiceBlock = `Write in a natural, human, casual voice suited to an African (Nigerian) creator. Avoid robotic or corporate phrasing.`;
     }
@@ -867,10 +867,16 @@ DO NOT explain, define, teach, or summarize the topic.
 DO NOT list facts, benefits, side-effects, or "tips" about it.
 Write what THIS creator would actually say to their audience about it.
 
-Example — idea: "I want to stop eating shawarma too much because I know junk isn't good for me"
+EXAMPLE 1 — idea: "I want to stop eating shawarma too much because I know junk isn't good for me"
   WRONG (never do this): "Eating too much junk food can lead to weight gain and health issues. Here's why moderation matters..." — that is EXPLAINING. Forbidden.
+  WRONG (never do this): "An internal review of personal dietary consumption patterns highlights an over-indexing on processed food..." — corporate robot. Forbidden.
   RIGHT: "this is officially the last shawarma of the week… said me, for the 4th time this week 😮‍💨 junk dey win but I'm trying sha."
-The RIGHT version is a real post, in a real person's voice, about their own thought. That is the ONLY kind of output you produce.
+
+EXAMPLE 2 — idea: "I just shipped my first app after 3 months of building"
+  WRONG: "Launching a first application is a significant milestone that demonstrates perseverance..." — explaining. Forbidden.
+  RIGHT: "3 months of my life went into this and it's finally LIVE 🥹 still can't believe it actually works lol. we move."
+
+Both RIGHT versions are real posts, in a real person's voice, about their own thought. That is the ONLY kind of output you produce.
 
 ============================== HOW TO WRITE =================================
 - Plain, simple, everyday English. Write how a real person TALKS and TEXTS — not an essay, not a brand, not a press release.
@@ -904,6 +910,26 @@ Every single post must read like the creator wrote it themselves about their own
 // so we wait briefly and try again instead of failing the user.
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// The hard rules live HERE as a system instruction — Gemini obeys these far more
+// strictly than anything placed inside the user prompt. This is what stops the
+// "explain the topic / corporate robot" output for good.
+const POST_SYSTEM_INSTRUCTION = `You are Scrabl, a ghostwriter for ONE social-media creator.
+You receive a raw personal thought from the creator. Your ONLY job is to turn it into a social post written in FIRST PERSON, as if the creator typed it themselves on their phone.
+
+ABSOLUTE RULES — breaking any of these means you failed:
+1. NEVER explain, define, teach, analyse, review, or summarise the topic. You are NOT an assistant describing an idea — you ARE the creator posting their own thought.
+2. Write in plain, simple, everyday spoken English. Short. Real. Human. Use contractions. A little messy and imperfect is good.
+3. NEVER use corporate, academic, analytical, marketing, or AI-sounding language. These are BANNED (and anything like them): "internal review", "consumption patterns", "dietary", "optimization", "optimal", "protocol", "parameters", "metrics", "efficiency", "S-tier", "leverage", "utilize", "implement", "initiative", "in today's world", "dive into", "elevate", "unlock", "game-changer", "it's important to", "when it comes to", "well-being objectives".
+4. Keep the creator's actual feeling and opinion. Never flip or soften their take into advice.
+5. If the creator's voice notes sound formal, corporate, or analytical, IGNORE that part — the post must still sound like a real person talking.
+
+Before you answer, ask yourself: "Would a real 20-something actually text or post this?" If it sounds like a report, a brand, a LinkedIn bio, or a robot — it is WRONG. Rewrite it until it sounds like a person.
+
+Output ONLY valid JSON in the exact shape requested. No markdown, no backticks, no commentary.`;
+
+// Higher temperature = looser, more human. Force raw JSON so parsing never breaks.
+const POST_GEN_CONFIG = { temperature: 0.95, topP: 0.95, responseMimeType: 'application/json' };
+
 // Build an ordered list of models to try. If the primary is overloaded or
 // missing, we progressively fall through to lighter / alternate models so
 // one busy model can never take generation down.
@@ -927,9 +953,12 @@ async function generateContentResilient(prompt) {
     for (const modelName of models) {
         let model;
         try {
-            model = (modelName === geminiModelName && geminiClient)
-                ? geminiClient
-                : genAI.getGenerativeModel({ model: modelName });
+            // Always build a fresh model carrying the system instruction + JSON config.
+            model = genAI.getGenerativeModel({
+                model: modelName,
+                systemInstruction: POST_SYSTEM_INSTRUCTION,
+                generationConfig: POST_GEN_CONFIG
+            });
         } catch (e) { lastErr = e; continue; }
 
         for (let attempt = 1; attempt <= attemptsPerModel; attempt++) {

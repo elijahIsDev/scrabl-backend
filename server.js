@@ -54,7 +54,7 @@ try {
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '12mb' })); // room for Screenshot-to-Post image uploads (base64)
 
 // ========== HELPERS ==========
 function generateWaitlistCode() {
@@ -828,10 +828,11 @@ const PLATFORM_RULES = {
     "Threads": "Casual and conversational, like a relaxed X post. Minimal or no hashtags."
 };
 
-function buildGenerationPrompt(input, platforms, user) {
+function buildGenerationPrompt(input, platforms, user, mode) {
     const dna = user.voiceDNA || null;
     const profile = user.profile || {};
     const niche = Array.isArray(profile.niche) ? profile.niche.join(', ') : (profile.niche || 'general');
+    const isScreenshot = mode === 'screenshot';
 
     let voiceBlock;
     if (dna) {
@@ -895,8 +896,14 @@ Every RIGHT post is a natural, ready-to-post take that stays true to the creator
 For EACH platform below, write it natively for that platform (never copy-paste the same text across platforms):
 ${platformInstructions}
 
-THE CREATOR'S RAW IDEA:
-${input}
+${isScreenshot
+  ? `THE SOURCE — A SCREENSHOT:
+A screenshot of a post/tweet the creator LIKES is attached as an image. READ the words inside that screenshot. That post is only your REFERENCE for the idea and angle — take its core message and rewrite it completely as THIS creator's OWN post, in their voice (all rules above).
+- Do NOT copy it word-for-word, and do NOT keep the original author's voice — make it sound like the creator, not the person in the screenshot.
+- Do NOT mention the screenshot, do NOT describe the image, do NOT quote it. Just give the creator's own version of that kind of post.
+- Ignore any usernames, handles, timestamps, like/retweet counts, or UI buttons in the image — only the actual post message matters.${input ? `\n- The creator also added this note to steer it: "${input}"` : ''}`
+  : `THE CREATOR'S RAW IDEA:
+${input}`}
 
 Return ONLY valid JSON (no markdown, no backticks, no commentary) in EXACTLY this shape:
 {
@@ -998,7 +1005,22 @@ app.post('/api/generate', async (req, res) => {
 
         const input = (req.body?.input || '').trim();
         let platforms = req.body?.platforms;
-        if (!input) return res.status(400).json({ error: 'Type an idea to generate from.' });
+
+        // Screenshot-to-Post: an optional image the user uploaded. It may arrive as a
+        // raw base64 string or as a data URL ("data:image/png;base64,....").
+        let imageRaw = req.body?.image || '';
+        let imageMime = req.body?.imageMimeType || '';
+        if (imageRaw && imageRaw.startsWith('data:')) {
+            const m = imageRaw.match(/^data:([^;]+);base64,(.*)$/);
+            if (m) { imageMime = imageMime || m[1]; imageRaw = m[2]; }
+        }
+        const hasImage = !!imageRaw;
+        const mode = hasImage ? 'screenshot' : 'text';
+        if (!hasImage) imageMime = '';
+        else if (!imageMime) imageMime = 'image/png';
+
+        // Text mode needs an idea. Screenshot mode needs the image (a note is optional).
+        if (!hasImage && !input) return res.status(400).json({ error: 'Type an idea to generate from.' });
         if (!Array.isArray(platforms) || platforms.length === 0) {
             return res.status(400).json({ error: 'Pick at least one platform.' });
         }
@@ -1007,8 +1029,12 @@ app.post('/api/generate', async (req, res) => {
         const user = await User.findById(payload.id);
         if (!user) return res.status(404).json({ error: 'Account not found.' });
 
-        const prompt = buildGenerationPrompt(input, platforms, user);
-        const result = await generateContentResilient(prompt);
+        const prompt = buildGenerationPrompt(input, platforms, user, mode);
+        // When there's a screenshot, send the prompt + image together as multimodal parts.
+        const request = hasImage
+            ? [{ text: prompt }, { inlineData: { mimeType: imageMime, data: imageRaw } }]
+            : prompt;
+        const result = await generateContentResilient(request);
         const rawText = await extractGeminiRawText(result);
         const parsed = parseVoiceJSON(rawText);
 
@@ -1016,7 +1042,7 @@ app.post('/api/generate', async (req, res) => {
             return res.status(502).json({ error: 'Could not generate right now. Please try again.' });
         }
 
-        console.log('Generated for ' + user.email + ' - platforms: ' + platforms.join(', '));
+        console.log('Generated (' + mode + ') for ' + user.email + ' - platforms: ' + platforms.join(', '));
         return res.status(200).json({ success: true, results: parsed.platforms });
     } catch (err) {
         console.error('Generate error:', err);

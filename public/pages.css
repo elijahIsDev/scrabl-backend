@@ -199,3 +199,11 @@ footer .col a:hover{color:var(--text)}
   .cards{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto;animation:none!important}}
+
+
+/* ===== custom scrollbar — Scrabl dark/gold ===== */
+*{scrollbar-width:thin;scrollbar-color:#2e2e34 transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2e2e34;border-radius:8px;border:2px solid #0A0A0B}
+::-webkit-scrollbar-thumb:hover{background:#D4AF37}

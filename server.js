@@ -16,7 +16,9 @@ const { sendWaitlistEmail, sendVerificationEmail, sendAdminNotification, sendFee
 const app = express();
 const PORT = process.env.PORT || 5500;
 
+// Serve the site whether files live at the repo root OR inside a /public folder
 app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ---- Stay alive: one bad request must never take the whole server down ----
 process.on('unhandledRejection', function (reason) {

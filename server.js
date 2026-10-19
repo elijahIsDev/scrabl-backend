@@ -16,7 +16,15 @@ const { sendWaitlistEmail, sendVerificationEmail, sendAdminNotification, sendFee
 const app = express();
 const PORT = process.env.PORT || 5500;
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname)));
+
+// ---- Stay alive: one bad request must never take the whole server down ----
+process.on('unhandledRejection', function (reason) {
+    console.error('⚠️ Unhandled promise rejection (server kept alive):', reason && reason.message ? reason.message : reason);
+});
+process.on('uncaughtException', function (err) {
+    console.error('⚠️ Uncaught exception (server kept alive):', err && err.message ? err.message : err);
+});
 
 // Initialize Gemini client with API key
 let geminiClient = null;
@@ -839,30 +847,50 @@ function buildGenerationPrompt(input, platforms, user) {
         return `PLATFORM "${p}": ${rule}`;
     }).join('\n');
 
-    return `You are Scrabl, a content engine built for African (especially Nigerian) creators.
-You write like a REAL human, never like AI. You never use robotic, generic, or corporate "AI-slop" phrasing, and you never sound like a press release.
+    return `You are Scrabl — a ghostwriter for ONE specific creator. You take a raw thought from the creator and turn it into content they could post RIGHT NOW, written exactly as if they wrote it themselves.
 
 ${voiceBlock}
 
 The creator's niche: ${niche}.
 
-The creator will give you ONE raw idea. For EACH platform below, reimagine it natively for that platform (never copy-paste the same text) while keeping the creator's voice intact.
+========================= THE #1 RULE (read carefully) =========================
+The creator is handing you a personal thought, opinion, feeling, or moment — NOT a topic to explain.
+Your job is to write a POST in FIRST PERSON, as if it came straight from the creator's own mouth.
+
+DO NOT explain, define, teach, or summarize the topic.
+DO NOT list facts, benefits, side-effects, or "tips" about it.
+Write what THIS creator would actually say to their audience about it.
+
+Example — idea: "I want to stop eating shawarma too much because I know junk isn't good for me"
+  WRONG (never do this): "Eating too much junk food can lead to weight gain and health issues. Here's why moderation matters..." — that is EXPLAINING. Forbidden.
+  RIGHT: "this is officially the last shawarma of the week… said me, for the 4th time this week 😮‍💨 junk dey win but I'm trying sha."
+The RIGHT version is a real post, in a real person's voice, about their own thought. That is the ONLY kind of output you produce.
+
+============================== HOW TO WRITE =================================
+- Plain, simple, everyday English. Write how a real person TALKS and TEXTS — not an essay, not a brand, not a press release.
+- Keep it short and natural. Use contractions. It's okay to be a little messy, human, and imperfect.
+- Nigerian/Naija-natural (pidgin, slang) ONLY if the creator's own voice uses it — match them, don't force it.
+- Keep the creator's actual opinion/feeling/angle from their idea. Never swap in a different take.
+- NEVER use AI or corporate language or shapes: "in today's world", "in the world of", "unlock", "elevate", "game-changer", "dive into", "navigate", "it's important to", "when it comes to", "look no further", neat 3-point lists, or suspiciously perfect parallel sentences.
+- Don't stuff hashtags into the post body — hashtags go only in the hashtags field.
+
+For EACH platform below, write it natively for that platform (never copy-paste the same text across platforms):
 ${platformInstructions}
 
-THE CREATOR'S IDEA:
+THE CREATOR'S RAW IDEA:
 ${input}
 
 Return ONLY valid JSON (no markdown, no backticks, no commentary) in EXACTLY this shape:
 {
   "platforms": {
     "<platform name exactly as given>": {
-      "post": "the ready-to-post caption in their voice, optimized for this platform",
-      "hook": "a scroll-stopping first line or hook",
-      "hashtags": ["#relevant", "#tags"]
+      "post": "the ready-to-post text, first person, in the creator's voice — a real post, not an explanation",
+      "hook": "a scroll-stopping first line (this can be the opening line of the post)",
+      "hashtags": ["#relevant"]
     }
   }
 }
-Include an entry for every platform requested. Keep everything in the creator's authentic voice.`;
+Every single post must read like the creator wrote it themselves about their own idea — never like an explanation OF the idea. Include an entry for every platform requested.`;
 }
 
 app.post('/api/generate', async (req, res) => {

@@ -31,11 +31,15 @@ process.on('uncaughtException', function (err) {
 // Initialize Gemini client with API key
 let geminiClient = null;
 let geminiInitError = null;
+let genAI = null;                 // kept around so we can spin up a fallback model on demand
+let geminiModelName = null;
 try {
     const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
-    const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+    // Default to a current, supported model. gemini-2.0-flash was retired — never fall back to it.
+    const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     if (apiKey) {
-        const genAI = new GoogleGenerativeAI(apiKey);
+        genAI = new GoogleGenerativeAI(apiKey);
+        geminiModelName = geminiModel;
         geminiClient = genAI.getGenerativeModel({ model: geminiModel });
         console.log(`✅ Gemini client initialized with API key and model: ${geminiModel}`);
     } else {
@@ -895,6 +899,57 @@ Return ONLY valid JSON (no markdown, no backticks, no commentary) in EXACTLY thi
 Every single post must read like the creator wrote it themselves about their own idea — never like an explanation OF the idea. Include an entry for every platform requested.`;
 }
 
+// Call Gemini with automatic retries. Google's free tier throws transient
+// 503 (overloaded) / 429 (rate limit) / 500 errors — those are NOT our bug,
+// so we wait briefly and try again instead of failing the user.
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Build an ordered list of models to try. If the primary is overloaded or
+// missing, we progressively fall through to lighter / alternate models so
+// one busy model can never take generation down.
+function buildModelChain() {
+    const chain = [];
+    const push = (m) => { if (m && !chain.includes(m)) chain.push(m); };
+    push(geminiModelName);                      // whatever GEMINI_MODEL is set to
+    push(process.env.GEMINI_FALLBACK_MODEL);    // optional manual override
+    push('gemini-2.5-flash');
+    push('gemini-2.5-flash-lite');
+    push('gemini-flash-latest');
+    return chain;
+}
+
+async function generateContentResilient(prompt) {
+    const transient = [429, 500, 502, 503, 504]; // Google busy — safe to retry
+    const attemptsPerModel = 2;
+    const models = buildModelChain();
+    let lastErr = null;
+
+    for (const modelName of models) {
+        let model;
+        try {
+            model = (modelName === geminiModelName && geminiClient)
+                ? geminiClient
+                : genAI.getGenerativeModel({ model: modelName });
+        } catch (e) { lastErr = e; continue; }
+
+        for (let attempt = 1; attempt <= attemptsPerModel; attempt++) {
+            try {
+                return await model.generateContent(prompt);
+            } catch (err) {
+                lastErr = err;
+                const status = err && err.status;
+                if (status === 404) break;                 // model unavailable → next in chain
+                if (!transient.includes(status)) throw err; // real error (bad key/prompt) → surface it
+                const waitMs = 500 * attempt;              // 0.5s, then 1s
+                console.warn(`Gemini ${status} on ${modelName} (try ${attempt}/${attemptsPerModel}) — retrying in ${waitMs}ms`);
+                await sleep(waitMs);
+            }
+        }
+        console.warn(`Gemini: ${modelName} unavailable/overloaded — moving to next model`);
+    }
+    throw lastErr;
+}
+
 app.post('/api/generate', async (req, res) => {
     try {
         const auth = req.headers.authorization || '';
@@ -916,7 +971,7 @@ app.post('/api/generate', async (req, res) => {
         if (!user) return res.status(404).json({ error: 'Account not found.' });
 
         const prompt = buildGenerationPrompt(input, platforms, user);
-        const result = await geminiClient.generateContent(prompt);
+        const result = await generateContentResilient(prompt);
         const rawText = await extractGeminiRawText(result);
         const parsed = parseVoiceJSON(rawText);
 
@@ -928,6 +983,12 @@ app.post('/api/generate', async (req, res) => {
         return res.status(200).json({ success: true, results: parsed.platforms });
     } catch (err) {
         console.error('Generate error:', err);
+        // Google overloaded even after retries — tell the user it's temporary, not their fault.
+        if (err && [429, 503].includes(err.status)) {
+            return res.status(503).json({
+                error: 'Our AI is a little busy right now. Give it a few seconds and tap Generate again.'
+            });
+        }
         return res.status(500).json({ error: 'Generation failed. Please try again.' });
     }
 });

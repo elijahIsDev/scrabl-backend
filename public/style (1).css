@@ -1,0 +1,2795 @@
+:root {
+    /* The Permanent Pxxl Dark Palette */
+    --bg: #0B0B0F;           /* Deep smoky charcoal */
+    --text: #F5F5F5;        /* Soft white for readability */
+    --card-bg: rgba(22, 22, 28, 0.7); 
+    --card-border: rgba(255, 255, 255, 0.08);
+    --accent: #D4AF37;      /* Lagos Gold */
+    --subtext: #8E8E93;      /* Muted pro grey */
+    --glass: blur(12px);
+}
+
+[data-theme="dark"] {
+    /* The Pxxl / Linear Dark Mode Palette */
+    --bg: #0B0B0F;           /* Deep charcoal, not pure black */
+    --text: #F5F5F5;        /* Soft white text */
+    --card-bg: rgba(22, 22, 28, 0.7); /* Slightly lighter cards for depth */
+    --card-border: rgba(255, 255, 255, 0.08);
+    --subtext: #8E8E93;      /* Muted grey for descriptions */
+}
+
+html {
+    scroll-behavior: smooth;
+    /* This 100px offset ensures the navbar doesn't cover the section title */
+    scroll-padding-top: 100px; 
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+body { 
+    background: var(--bg); 
+    color: var(--text); 
+    font-family: "Poppins", sans-serif; 
+    transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-x: hidden;
+    padding-top: 80px;
+}
+
+/* ===== FLOATING PARTICLES BACKGROUND ===== */
+.floating-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.particle {
+    position: absolute;
+    opacity: 0.3;
+    will-change: transform;
+}
+
+.particle-leaf {
+    font-size: 2rem;
+    animation: float 8s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+    25% { transform: translateY(-20px) translateX(10px) rotate(45deg); }
+    50% { transform: translateY(-40px) translateX(-15px) rotate(90deg); }
+    75% { transform: translateY(-20px) translateX(20px) rotate(180deg); }
+}
+
+/* Staggered animation durations for variety */
+.particle:nth-child(1) { animation-duration: 8s; animation-delay: 0s; }
+.particle:nth-child(2) { animation-duration: 10s; animation-delay: 2s; }
+.particle:nth-child(3) { animation-duration: 9s; animation-delay: 4s; }
+.particle:nth-child(4) { animation-duration: 11s; animation-delay: 1s; }
+.particle:nth-child(5) { animation-duration: 8.5s; animation-delay: 3s; }
+
+/* ===== SCROLL-TRIGGERED ANIMATIONS ===== */
+[data-reveal] {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-reveal].revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered reveal for elements */
+[data-reveal-stagger] {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-reveal-stagger].revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Stagger delays */
+[data-stagger-1] { transition-delay: 0s; }
+[data-stagger-2] { transition-delay: 0.15s; }
+[data-stagger-3] { transition-delay: 0.3s; }
+[data-stagger-4] { transition-delay: 0.45s; }
+
+/* ===== MAGNETIC BUTTON EFFECT ===== */
+.cta-massive, .cta-secondary {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Ripple effect */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0);
+    animation: ripple-animation 0.6s ease-out;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Magnetic cursor follow (enhanced hover) */
+.cta-massive {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cta-massive:hover {
+    transform: translateY(-6px) scale(1.05);
+    box-shadow: 0 30px 60px rgba(212, 175, 55, 0.4);
+}
+
+.cta-massive:active {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.cta-secondary {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.cta-secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.cta-secondary:hover::before {
+    left: 100%;
+}
+
+.cta-secondary:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    background: rgba(212, 175, 55, 0.08);
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
+}
+
+/* 1. NAVBAR CONTAINER */
+/* --- SYMMETRICAL PREMIUM NAVBAR --- */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: rgba(11, 11, 15, 0.85); /* Dark translucent */
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--card-border);
+    height: 80px;
+    display: flex;
+    align-items: center;
+}
+
+.nav-container {
+    width: 92%;
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* The secret sauce for centering */
+    align-items: center;
+}
+
+/* Center Links */
+.nav-links {
+    display: flex;
+    gap: 35px;
+    justify-content: center;
+}
+
+.nav-links a {
+    color: var(--subtext);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--text);
+}
+
+/* Right Side Auth */
+.nav-auth {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    justify-content: flex-end; /* Keeps buttons glued to the right */
+}
+
+.login-link {
+    color: var(--subtext);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.login-link:hover {
+    color: var(--text);
+}
+
+.signup-btn {
+    background: var(--text); /* Solid White */
+    color: var(--bg);       /* Dark Text */
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--text);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.signup-btn:hover {
+    background: transparent;
+    color: var(--text);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 900px) {
+    .nav-links { display: none; } /* Hide links on mobile for cleaner look */
+    .nav-container { grid-template-columns: 1fr 1fr; }
+}
+
+/* 2. HERO SECTION */
+.hero {
+    text-align: center;
+    padding: 160px 10% 100px; 
+}
+
+.hero h1 {
+    font-family: "Poppins", sans-serif;
+    font-size: 4.5rem; 
+    line-height: 1.0;
+    letter-spacing: -0.04em; 
+    margin-bottom: 28px;
+}
+
+.hero p {
+    font-family: "Poppins", sans-serif;
+    color: var(--subtext);
+    font-size: 1.10rem;
+    max-width: 600px; 
+    margin: 0 auto 48px;
+    line-height: 1.5;
+}
+
+/* HERO ACTION GROUP */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(212, 175, 55, 0.14);
+    color: var(--accent);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.08);
+}
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+}
+
+.cta-massive {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 20px 48px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cta-massive:hover { transform: translateY(-4px) scale(1.02); }
+
+.cta-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--card-border);
+    padding: 18px 40px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cta-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--text);
+}
+
+/* --- FEATURES BADGE (Dribbble-Style) --- */
+.features-badge-container {
+    display: flex;
+    justify-content: flex-start; /* Aligned Left */
+    margin-bottom: 24px;
+}
+
+.features-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em; /* Premium Spacing */
+    color: var(--accent); /* Lagos Gold */
+    background: rgba(212, 175, 55, 0.08); /* Translucent Gold */
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 100px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+/* --- THE MASTER OFFSET (Expanded for Visibility) --- */
+.offset-section {
+    display: grid;
+    /* Increased left side to 40% for better headline weight */
+    grid-template-columns: 0.4fr 0.6fr; 
+    gap: 100px; /* Wider gap for a high-end feel */
+    width: 95%;
+    max-width: 1440px;
+    margin: 180px auto;
+    align-items: start;
+}
+
+/* --- THE VERTICAL CONTENT STACK --- */
+.content-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px; /* Tight, intentional spacing between elements */
+}
+
+/* 1. BADGE STYLING */
+.features-badge-container {
+    margin-bottom: 8px;
+}
+
+.features-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 100px;
+    backdrop-filter: blur(5px);
+}
+
+/* 2. HEADLINE STYLING */
+.offset-title {
+    font-family: "Poppins", sans-serif;
+    font-size: 4.5rem; /* Large, editorial scale */
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    color: var(--text);
+    margin: 12px 0 32px;
+}
+
+.offset-description {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.15rem;
+    color: var(--subtext);
+    line-height: 1.7;
+    max-width: 480px;
+}
+/* 4. BENTO GRID (Preserving your exact shapes) */
+.bento-container.compact-bento {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    grid-auto-rows: 180px;
+    gap: 16px; 
+    width: 100%;
+}
+
+/* Note: I haven't changed your .bento-card styles to preserve your shapes */
+
+/* THE BATO-INSPIRED CARDS */
+.bento-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px; /* Consistent slick curve design */
+    padding: 30px; /* More internal room for visuals later */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.bento-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(212, 175, 55, 0.4); /* Lagos Gold glow */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* --- COLUMN SPANNING --- */
+.medium { grid-column: span 2; }
+.small { grid-column: span 1; }
+
+/* --- TYPOGRAPHY DETAILS --- */
+.card-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.card-desc {
+    font-size: 0.9rem;
+    color: var(--subtext);
+    line-height: 1.4;
+}
+
+.accent-text {
+    font-size: 3.2rem; /* Massive stat numbers */
+    font-family: "Poppins", sans-serif;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.detail-icon {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+    display: block;
+}
+
+/* 4. PROOF SLIDER */
+.proof-section { padding: 120px 8%; text-align: center; }
+
+.comparison-container {
+    position: relative; 
+    width: 100%; 
+    max-width: 1100px; 
+    aspect-ratio: 16 / 9; 
+    margin: 60px auto;
+    border-radius: 40px; 
+    overflow: hidden; 
+    box-shadow: 0 40px 100px rgba(0,0,0,0.1);
+}
+
+.before { 
+    background: #222; 
+    width: 50%; z-index: 2; 
+    border-right: 3px solid var(--accent);
+}
+
+.slider {
+    position: absolute; -webkit-appearance: none; appearance: none;
+    width: 100%; height: 100%; background: transparent; z-index: 10; cursor: ew-resize;
+}
+
+/* 5. PRICING */
+.pricing-grid { 
+    display: flex; justify-content: center; gap: 40px; 
+    padding: 60px 8% 160px; 
+}
+
+.price-card { 
+    background: var(--card-bg); 
+    border: 1px solid var(--card-border); 
+    padding: 60px 40px; 
+    border-radius: 16px; 
+    width: 360px; 
+    transition: 0.4s;
+}
+
+.price-card.featured {
+    box-shadow: 0 30px 60px rgba(212, 175, 55, 0.15);
+    border: 1.5px solid var(--accent);
+}
+
+.logo span { color: var(--accent); }
+
+/* --- FIXED DROPDOWN STICKINESS --- */
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%; /* Sits exactly at the bottom of the button */
+    left: 0;
+    background-color: var(--card-bg);
+    min-width: 180px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1001;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(10px);
+    
+    /* THE FIX: This invisible padding bridges the gap between button and menu */
+    padding-top: 10px; 
+    margin-top: 0; 
+}
+
+/* Ensure the menu shows when hovering the ENTIRE dropdown area */
+.dropdown:hover .dropdown-content {
+    display: block;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.dropdown-content a {
+    color: var(--text);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+}
+
+.dropdown-content a:hover {
+    background-color: rgba(212, 175, 55, 0.1); /* Lagos Gold tint */
+    color: var(--accent);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- New Navbar Actions --- */
+.nav-link-alt {
+    text-decoration: none;
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.nav-cta-signup {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    text-decoration: none;
+}
+
+.nav-cta-signup:hover {
+    transform: scale(1.03);
+    opacity: 0.9;
+}
+
+/* ===== MAC MOCKUP ===== */
+
+.hero-visual {
+    display: flex;
+    justify-content: center;
+    margin-top: 120px;
+    padding-top: 20px;
+}
+
+/* WINDOW */
+.mac-window {
+    width: 900px;
+    border-radius: 20px;
+    background: rgba(15, 15, 20, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.4);
+    padding: 20px;
+    transition: 0.4s ease;
+}
+
+/* TOP BAR */
+.mac-topbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.red { background: #ff5f57; }
+.yellow { background: #febc2e; }
+.green { background: #28c840; }
+
+/* TITLE */
+.scrabl-title {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+}
+
+/* GRID */
+.mac-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.mac-card {
+    position: relative;
+    padding: 20px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid transparent;
+    transition: 0.3s ease;
+    overflow: hidden;
+}
+
+/* GRADIENT BORDER */
+.mac-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: 16px;
+    background: linear-gradient(
+        120deg,
+        #D4AF37,
+        rgba(255,255,255,0.2),
+        #D4AF37,
+        rgba(255,255,255,0.2)
+    );
+    background-size: 300% 300%;
+    animation: glowFlow 6s linear infinite;
+
+    -webkit-mask: 
+        linear-gradient(#000 0 0) content-box, 
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+@keyframes glowFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* HOVER GLOW */
+.mac-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 0 40px rgba(212,175,55,0.15);
+}
+
+/* SUBTLE INNER LIGHT */
+.mac-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: radial-gradient(circle at top left, rgba(255,255,255,0.08), transparent 60%);
+    pointer-events: none;
+}
+
+.mac-card h4 {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.mac-card p {
+    font-size: 0.85rem;
+    color: var(--subtext);
+    line-height: 1.5;
+}
+
+/* FULL WIDTH */
+.mac-card.full {
+    grid-column: span 2;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .mac-window {
+        width: 100%;
+    }
+
+    .mac-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mac-card.full {
+        grid-column: span 1;
+    }
+}
+
+.mac-window {
+    position: relative;
+}
+
+/* OUTER GLOW */
+.mac-window::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 22px;
+    background: linear-gradient(120deg, #D4AF37, transparent, #D4AF37);
+    filter: blur(25px);
+    opacity: 0.15;
+    animation: pulseGlow 4s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.1; transform: scale(1); }
+    50% { opacity: 0.25; transform: scale(1.02); }
+}
+
+/* AI STATUS ROW */
+.ai-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    position: relative;
+}
+
+/* LIVE DOT */
+.dot-live {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 10px #22c55e;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* TYPING TEXT */
+.typing-text {
+    font-size: 0.85rem;
+    color: var(--subtext);
+    min-height: 1.2em;
+    position: relative;
+}
+
+.typing-text::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--accent);
+    animation: cursor-blink 1s infinite;
+}
+
+@keyframes cursor-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+/* ===== STEP INDICATOR ===== */
+.step-indicator {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 16px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.3);
+    transition: all 0.4s ease;
+}
+
+.step-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    transform: scale(1.3);
+}
+
+.step-label {
+    font-size: 0.65rem;
+    color: var(--subtext);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.step-label.active {
+    color: var(--accent);
+}
+
+/* ===== MAC CARD ANIMATIONS ===== */
+.mac-card {
+    position: relative;
+    padding: 20px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid transparent;
+    transition: 0.3s ease;
+    overflow: hidden;
+    animation: slideInCard 0.7s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+.mac-card:nth-child(1) { animation-delay: 0.2s; }
+.mac-card:nth-child(2) { animation-delay: 0.4s; }
+.mac-card:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes slideInCard {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced hover on Step 2 (Scrabbling) */
+.mac-card.active {
+    border-color: rgba(212, 175, 55, 0.6);
+    background: rgba(212, 175, 55, 0.05);
+    box-shadow: inset 0 0 30px rgba(212, 175, 55, 0.1);
+}
+
+/* --- THE INDUSTRIAL GRID (Broad 2x2 Layout) --- */
+.industrial-grid {
+    display: grid;
+    /* Broadened to 2 columns to make text more readable and "visible" */
+    grid-template-columns: repeat(2, 1fr); 
+    width: 100%;
+    border-top: 1px solid var(--card-border); /* Top closure line */
+}
+
+.feature-item {
+    padding: 60px 40px; /* Massive internal padding for luxury feel */
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--card-border); 
+    border-bottom: 1px solid var(--card-border); /* Full-grid separation */
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Enhanced hover effects */
+.feature-item:hover {
+    background: rgba(212, 175, 55, 0.05);
+    transform: translateY(-4px);
+    border-left-color: rgba(212, 175, 55, 0.4);
+}
+
+.feature-item:hover .solution-icon-wrapper {
+    transform: translateY(-8px) scale(1.1) rotate(5deg);
+}
+
+.feature-item:hover h3 {
+    color: var(--accent);
+}
+
+/* Icon wrapper animation */
+.solution-icon-wrapper {
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    display: inline-flex;
+    width: fit-content;
+    margin-bottom: 20px;
+}
+
+.solution-icon {
+    color: var(--accent);
+    font-size: 2.5rem;
+}
+
+/* Feature item spacing */
+.feature-item:nth-child(odd) {
+    border-left: none;
+    padding-left: 0;
+}
+
+.industrial-icon {
+    font-size: 2rem; /* Scaled up icon */
+    margin-bottom: 24px;
+    display: block;
+}
+
+.feature-item h3 {
+    font-size: 1rem; /* Slightly larger for the broad layout */
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.12em; /* Wider premium tracking */
+    color: var(--text);
+    margin-bottom: 16px;
+}
+
+.feature-item p {
+    font-size: 1rem;
+    color: var(--subtext);
+    line-height: 1.6;
+    max-width: 340px; /* Keeps text lines short and easy to read */
+}
+
+/* --- MOBILE RESPONSIVITY --- */
+@media (max-width: 1150px) {
+    .offset-section {
+        grid-template-columns: 1fr;
+        gap: 60px;
+        margin: 100px auto;
+    }
+    
+    .industrial-grid {
+        grid-template-columns: 1fr; /* Single column for focus */
+    }
+    
+    .feature-item {
+        border-left: none;
+        padding: 40px 0;
+    }
+}
+
+/* --- USE CASES SECTION --- */
+.use-cases-section {
+    padding: 120px 5%;
+    max-width: 1400px;
+    margin: 0 auto;
+    text-align: Center;
+}
+
+.use-cases-header {
+    margin-bottom: 80px;
+}
+
+.use-cases-title {
+    font-family: "Poppins", sans-serif;
+    font-size: 4rem;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
+}
+
+.use-cases-title span {
+    color: var(--accent);
+}
+
+.use-cases-description {
+    font-size: 1.2rem;
+    color: var(--subtext);
+    max-width: 650px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* --- THE GLASS GRID --- */
+.use-cases-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 60px;
+}
+
+.case-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 50px 40px;
+    text-align: left;
+    transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.case-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(212, 175, 55, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.case-icon {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.case-card h3 {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+}
+
+.case-card p {
+    font-size: 1rem;
+    color: var(--subtext);
+    line-height: 1.6;
+}
+
+/* --- FOOTER CTA --- */
+.use-cases-footer {
+    display: flex;
+    justify-content: center;
+}
+
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 900px) {
+    .use-cases-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .use-cases-title {
+        font-size: 2.8rem;
+    }
+    
+    .case-card {
+        padding: 40px 30px;
+    }
+}
+
+/* --- TESTIMONIALS SECTION --- */
+.testimonials-section {
+    padding: 140px 5%;
+    max-width: 1400px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.testimonials-header {
+    margin-bottom: 80px;
+}
+
+.testimonials-title {
+    font-family: "Poppins", sans-serif;
+    font-size: 4rem;
+    line-height: 1.0;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
+}
+
+.testimonials-title span {
+    color: var(--accent);
+}
+
+.testimonials-description {
+    font-size: 1.1rem;
+    color: var(--subtext);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* --- THE GLASS GRID --- */
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Broad visibility logic */
+    gap: 24px;
+    margin-bottom: 80px;
+}
+
+.testi-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: left;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    transition: transform 0.4s ease;
+}
+
+.testi-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+.quote {
+    font-size: 1.25rem;
+    font-style: italic;
+    color: var(--text);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.creator-info {
+    margin-bottom: 16px;
+}
+
+.creator-info strong {
+    display: block;
+    font-size: 1rem;
+    color: var(--text);
+}
+
+.creator-info span {
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.benefit {
+    font-size: 0.85rem;
+    color: var(--subtext);
+    font-weight: 600;
+    border-top: 1px solid var(--card-border);
+    padding-top: 16px;
+}
+
+/* --- METRICS ROW --- */
+.metrics-row {
+    display: flex;
+    justify-content: center;
+    gap: 100px;
+    margin-bottom: 60px;
+    padding: 40px 0;
+    border-top: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--card-border);
+}
+
+.metric-number {
+    display: block;
+    font-family: "Poppins", sans-serif;
+    font-size: 3.5rem;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--subtext);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1000px) {
+    .testimonials-grid, .metrics-row {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+        gap: 40px;
+    }
+    
+    .testimonials-title {
+        font-size: 3rem;
+    }
+}
+
+/* --- FAQ SECTION --- */
+.faq-section {
+    padding: 140px 5%;
+    max-width: 1400px;
+    margin: 0 auto;
+    text-align: left; /* Aligned with the industrial look */
+}
+
+.faq-header {
+    margin-bottom: 80px;
+    max-width: 800px;
+}
+
+.faq-title {
+    font-family: "Poppins", sans-serif;
+    font-size: 4.5rem;
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    margin-bottom: 32px;
+}
+
+.faq-title span {
+    color: var(--accent);
+}
+
+.faq-description {
+    font-size: 1.15rem;
+    color: var(--subtext);
+    line-height: 1.7;
+    max-width: 500px;
+}
+
+/* --- THE BROAD FAQ GRID --- */
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2x2 for broad visibility */
+    gap: 0; /* Industrial line-art spacing */
+    border-top: 1px solid var(--card-border);
+}
+
+.faq-card {
+    padding: 60px 40px;
+    border-right: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--card-border);
+    background: transparent;
+    transition: background 0.4s ease;
+}
+
+/* Maintain industrial divider logic */
+.faq-card:nth-child(even) {
+    border-right: none;
+}
+
+.faq-card:hover {
+    background: rgba(212, 175, 55, 0.02);
+}
+
+.faq-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.faq-card p {
+    font-size: 1rem;
+    color: var(--subtext);
+    line-height: 1.6;
+    max-width: 400px;
+}
+
+/* --- FAQ FOOTER --- */
+.faq-footer {
+    margin-top: 80px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.faq-footer p {
+    color: var(--subtext);
+    font-weight: 500;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1100px) {
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .faq-card {
+        border-right: none;
+        padding: 40px 0;
+    }
+    
+    .faq-title {
+        font-size: 3.2rem;
+    }
+}
+
+/* --- PRICING SECTION --- */
+.pricing-section {
+    padding: 160px 5%;
+    max-width: 1400px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.pricing-header {
+    margin-bottom: 80px;
+}
+
+.pricing-title {
+    font-family: "Poppins", sans-serif;
+    font-size: 4.5rem;
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    margin-bottom: 24px;
+}
+
+.pricing-title span {
+    color: var(--accent);
+}
+
+.pricing-description {
+    font-size: 1.15rem;
+    color: var(--subtext);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* --- PRICING GRID --- */
+.pricing-grid {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 32px;
+    margin-bottom: 60px;
+}
+
+.price-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 40px;
+    padding: 60px 40px;
+    width: 100%;
+    max-width: 400px;
+    text-align: left;
+    position: relative;
+    backdrop-filter: blur(20px);
+    transition: transform 0.4s ease, border-color 0.4s ease;
+}
+
+/* Featured (Pro) Card Styling */
+.price-card.featured {
+    border: 2px solid var(--accent);
+    transform: scale(1.05);
+    z-index: 2;
+    box-shadow: 0 30px 60px rgba(212, 175, 55, 0.1);
+}
+
+.featured-badge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #000;
+    padding: 6px 18px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.plan-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--subtext);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+}
+
+.plan-price {
+    font-family: "Poppins", sans-serif;
+    font-size: 4rem;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 24px;
+}
+
+.plan-price span {
+    font-size: 1.2rem;
+    font-family: "Poppins", sans-serif;
+    color: var(--subtext);
+}
+
+.plan-summary {
+    font-size: 1rem;
+    color: var(--subtext);
+    margin-bottom: 32px;
+    min-height: 3rem;
+}
+
+/* Feature List */
+.plan-features {
+    list-style: none;
+    margin-bottom: 40px;
+    border-top: 1px solid var(--card-border);
+    padding-top: 32px;
+}
+
+.plan-features li {
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* CTA Buttons */
+.price-btn {
+    width: 100%;
+    padding: 18px;
+    border-radius: 100px;
+    border: 1px solid var(--card-border);
+    background: transparent;
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.price-btn.gold {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+}
+
+.price-btn:hover {
+    transform: translateY(-3px);
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+}
+
+/* Footer Note */
+.pricing-footer p {
+    color: var(--subtext);
+    font-size: 0.9rem;
+}
+
+/* Responsive Fix */
+@media (max-width: 1100px) {
+    .pricing-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .price-card.featured {
+        transform: scale(1);
+        margin: 40px 0;
+    }
+}
+
+/* --- ENHANCED PRICING HOVER --- */
+
+.price-card {
+    /* Ensure a smooth base for the transition */
+    transition: 
+        transform 0.5s cubic-bezier(0.2, 1, 0.3, 1), 
+        box-shadow 0.5s cubic-bezier(0.2, 1, 0.3, 1), 
+        border-color 0.4s ease;
+}
+
+.price-card:hover {
+    transform: translateY(-12px) scale(1.02); /* Subtle lift and expansion */
+    border-color: rgba(212, 175, 55, 0.4); /* Fade in the Gold border */
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.1), 
+        0 0 30px rgba(212, 175, 55, 0.15); /* Soft gold outer glow */
+    z-index: 10;
+}
+
+/* Specific logic for the Featured (Pro) card hover */
+.price-card.featured:hover {
+    transform: translateY(-12px) scale(1.07); /* Keeps its dominant scale */
+    box-shadow: 
+        0 30px 70px rgba(212, 175, 55, 0.25), 
+        0 0 40px rgba(212, 175, 55, 0.2); 
+}
+
+/* Button Internal Hover */
+.price-btn {
+    transition: all 0.3s ease;
+}
+
+.price-btn:hover {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+}
+
+/* --- FEEDBACK SECTION --- */
+.feedback-area {
+    margin-top: 180px;
+    margin-bottom: 180px;
+}
+
+.feedback-form-container {
+    padding: 60px;
+    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.05);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--subtext);
+}
+
+/* --- INPUT STYLING --- */
+input, select, textarea {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--card-border);
+    padding: 16px 20px;
+    border-radius: 12px;
+    color: var(--text);
+    font-family: "Poppins", sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] input, 
+[data-theme="dark"] select, 
+[data-theme="dark"] textarea {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: transparent;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+.form-note {
+    margin-top: 24px;
+    font-size: 0.85rem;
+    color: var(--subtext);
+    text-align: center;
+}
+
+/* --- RESPONSIVE FIX --- */
+@media (max-width: 900px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .feedback-form-container {
+        padding: 30px;
+    }
+}
+
+.success-message h3 span {
+    color: var(--accent);
+}
+
+.success-icon {
+    animation: goldShimmer 2s infinite alternate;
+}
+
+@keyframes goldShimmer {
+    from { filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.2)); }
+    to { filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6)); }
+}
+
+/* --- MODAL OVERLAY --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+/* --- Find this in your style.css --- */
+.modal-overlay.active {
+    display: flex !important; /* Forces the display to change */
+    opacity: 1 !important;    /* Forces the visibility */
+}
+/* --- MODAL CONTENT --- */
+.modal-content {
+    width: 90%;
+    max-width: 500px;
+    padding: 60px 40px;
+    border-radius: 16px;
+    text-align: center;
+    position: relative;
+    transform: scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.close-modal {
+    position: absolute;
+    top: 24px; right: 24px;
+    background: none; border: none;
+    font-size: 2rem; color: var(--subtext);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-modal:hover { color: var(--text); }
+
+.modal-title {
+    font-family: "Poppins", sans-serif;
+    font-size: 3.2rem;
+    line-height: 1;
+    margin: 16px 0;
+}
+
+.modal-title span { color: var(--accent); }
+
+.modal-form { margin-top: 32px; }
+
+.full-width { width: 100%; }
+
+.form-fineprint {
+    font-size: 0.75rem;
+    color: var(--subtext);
+    margin-top: 16px;
+}
+
+.footer-right a{
+    text-decoration: none;
+    color: var(--text);
+    
+}
+
+.footer-bottom{
+    text-align: center;
+}
+
+.footer-left{
+    font-size: 1.5rem;
+}
+
+/* --- UNIVERSAL BADGE ALIGNMENT --- */
+/* --- INDUSTRIAL BADGE SYSTEM --- */
+.use-cases-header, 
+.testimonials-header, 
+.pricing-header,
+.faq-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers the awareness badges */
+    text-align: center;
+    margin-bottom: 60px;
+    padding-top: 40px;
+}
+
+/* Specific FAQ alignment to match your Feedback section if preferred */
+.faq-header {
+    align-items: flex-start;
+    text-align: left;
+}
+
+.features-badge-container {
+    margin-bottom: 24px;
+}
+
+.features-badge {
+    padding: 8px 16px;
+    border: 1px solid var(--card-border);
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent); /* Lagos Gold */
+    background: var(--card-bg);
+    backdrop-filter: blur(5px);
+}
+
+.footer-bottom h3{
+    margin-top: 15rem;
+    margin-bottom: 2.5rem;
+    font-family: "Poppins", sans-serif;
+    color: var(--subtext);
+    font-weight: 400;
+    font-size: medium;
+}
+
+/* --- PROFESSIONAL ICON STYLING --- */
+i.bx {
+    vertical-align: middle;
+    line-height: 1;
+}
+
+/* Gold Icons for Feature Lists */
+.plan-features li i {
+    color: var(--accent);
+    font-size: 1.2rem;
+    margin-right: 10px;
+}
+
+/* Theme Toggle Icon Fix */
+.toggle-btn i {
+    font-size: 1.4rem;
+    color: var(--text);
+    transition: transform 0.3s ease;
+}
+
+.toggle-btn:hover i {
+    transform: rotate(15deg);
+    color: var(--accent);
+}
+
+/* Waitlist Back Arrow */
+.waitlist-container a i {
+    margin-right: 5px;
+    font-size: 1rem;
+}
+
+/* --- PRICING ICON ALIGNMENT --- */
+.plan-features {
+    list-style: none;
+    margin-bottom: 40px;
+    border-top: 1px solid var(--card-border);
+    padding-top: 32px;
+}
+
+.plan-features li {
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center; /* Vertical centering */
+    gap: 12px;
+}
+
+/* Gold accent for all pricing icons */
+.plan-features li i {
+    color: var(--accent);
+    font-size: 1.25rem;
+    width: 24px; /* Fixed width prevents text jumping */
+    text-align: center;
+}
+
+/* Dark mode adjustment for better icon visibility */
+[data-theme="dark"] .plan-features li i {
+    filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3));
+}
+
+.plan-features li i {
+    color: var(--accent);
+    font-size: 1.2rem;
+    margin-right: 12px;
+}
+
+/* --- LOGO & WEBHOOK ICON --- */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 4px; /* Perfect spacing between icon and text */
+    font-weight: 700;
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    outline: none;
+    border: none;
+    box-shadow: none;
+}
+
+.logo-icon-vegan {
+    color: var(--accent);
+    font-size: 1.8rem;
+    margin-right: 4px;
+}
+
+.logo-icon {
+    color: var(--accent); /* Lagos Gold (#D4AF37) */
+    font-size: 1.8rem;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.logo:hover .logo-icon {
+    transform: rotate(-15deg) scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+
+/* Fix for all icons on the page */
+svg.lucide {
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.footer-bottom{
+    margin-bottom: 1.5rem;
+}
+
+/* --- SCRABL BRAND LOGO --- */
+.logo-icon, .footer-icon {
+    color: var(--accent); /* Lagos Gold */
+    width: 28px;
+    height: 28px;
+    stroke-width: 2.5px; /* Thicker lines feel more "Logo" and less "Icon" */
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* --- GLOBAL ILLUSTRATION THEME ADAPTATION --- */
+
+/* This targets EVERY card in the "How it Works" section */
+.how-to-card, .use-case-card, .step-card {
+    transition: background 0.5s ease, border 0.5s ease;
+}
+
+/* Force ALL text inside these cards to use the theme variables */
+.how-to-card *, 
+.use-case-card *, 
+.step-card * {
+    color: var(--text) !important;
+    transition: color 0.5s ease;
+}
+
+/* Specifically soften the paragraph/description text */
+.how-to-card p, 
+.use-case-card p, 
+.step-card p {
+    color: var(--subtext) !important;
+    opacity: 0.9;
+}
+
+/* Ensure Lucide Icons inside cards follow the theme stroke color */
+.how-to-card svg, 
+.use-case-card svg {
+    stroke: var(--text) !important;
+}
+
+/* Keep the 'Lagos Gold' accents gold in both themes */
+.how-to-card .accent-text, 
+.how-to-card span[style*="color: var(--accent)"],
+.how-to-card .step-number {
+    color: var(--accent) !important;
+}
+
+/* Optional: Add a very slight tint to cards in light mode so they don't disappear */
+[data-theme="light"] .how-to-card {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Ensure DM Sans is the master font for all UI elements */
+.success-message, 
+.success-message h3, 
+.success-message p, 
+.success-message button {
+    font-family: 'DM Sans', sans-serif !important;
+}
+
+/* Success Icon Animation */
+.success-icon {
+    display: inline-flex;
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.success-message .cta-massive {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: 100px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.success-message .cta-massive:hover {
+    transform: translateY(-2px);
+    background: var(--accent);
+    color: white;
+}
+
+.dropdown-btn {
+    background: none;
+    border: none;
+    color: var(--subtext);
+    font-family: "Poppins", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-bottom: 10px; /* Gives you a larger hover "hit box" */
+    transition: color 0.3s ease;
+}
+
+.dropdown-btn:hover { color: var(--text); }
+
+/* Force removal of any underlines or borders on brand/nav elements */
+.logo, .logo *, .nav-links a {
+    text-decoration: none !important;
+    border-bottom: none !important;
+    outline: none !important;
+}
+
+/* --- THEME-ADAPTIVE LOGO --- */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 1.4rem;
+    /* This is the key: it pulls from your :root --text variable */
+    color: var(--text) !important; 
+    text-decoration: none !important;
+    transition: color 0.5s ease;
+}
+
+/* Ensure the Lucide icon also changes color */
+.logo-icon {
+    color: var(--accent) !important; /* Keep the Lagos Gold accent */
+    stroke: var(--accent);
+}
+
+/* If you have a span for the dot, ensure it stays gold or follows theme */
+.logo span,
+.logo-dot {
+    color: var(--accent);
+}
+
+.logo-mark {
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: rgba(8, 8, 12, 0.72);
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    box-shadow: inset 0 0 18px rgba(255, 214, 138, 0.08), 0 0 20px rgba(212, 175, 55, 0.12);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo-mark svg {
+    width: 100%;
+    height: 100%;
+}
+
+.logo:hover .logo-mark {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: inset 0 0 22px rgba(255, 214, 138, 0.12), 0 0 28px rgba(212, 175, 55, 0.18);
+}
+
+.logo {
+    transition: transform 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+}
+
+.logo:hover {
+    transform: translateY(-1px);
+}
+
+.logo-word {
+    font-size: 1.35rem;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.logo-dot {
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+[data-theme="dark"] .glass-panel, 
+[data-theme="dark"] .how-to-card {
+    background: linear-gradient(145deg, rgba(22, 22, 28, 0.9), rgba(15, 15, 20, 0.9));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* --- PREMIUM ANIMATION LIBRARY --- */
+
+/* 1. Reveal on Scroll */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 2. Glass Glow Hover (For Cards) */
+.how-to-card, .use-case-card, .pricing-card {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+}
+
+.how-to-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(212, 175, 55, 0.1);
+}
+
+/* 3. The "Lagos Gold" Pulse for Buttons */
+.cta-massive {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.cta-massive::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.cta-massive:hover::after {
+    opacity: 1;
+}
+
+/* 4. Subtle Floating Animation for Icons */
+.logo-icon, .step-number {
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.how-to-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(400px circle at var(--mouse-x) var(--mouse-y), rgba(212,175,55,0.08), transparent 40%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* --- FEEDBACK FORM THEME ADAPTATION --- */
+
+/* --- MATCHING FORM THEME --- */
+
+.feedback-form-container select {
+    background-color: rgba(255, 255, 255, 0.03) !important; /* Subtle glass look like inputs */
+    color: var(--text) !important;
+    /* Matches the light border of your other inputs */
+    border: 1px solid var(--card-border) !important; 
+    padding: 14px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+    cursor: pointer;
+    appearance: none;
+    /* Custom Lagos Gold arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23D4AF37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 18px;
+    transition: all 0.3s ease;
+}
+
+/* Ensure the hover state matches your other cards/inputs */
+.feedback-form-container select:hover {
+    border-color: rgba(212, 175, 55, 0.5) !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Fix for the dropdown menu items when clicked */
+.feedback-form-container option {
+    background-color: #121217; /* Solid dark background for readability */
+    color: white;
+}
+
+.feedback-form-container label {
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.star-rating {
+    display: flex;
+    gap: 8px;
+    padding: 10px 0;
+}
+
+.star-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    stroke: var(--subtext);
+    transition: all 0.2s ease;
+}
+
+.star-icon.active, .star-icon:hover {
+    stroke: var(--accent);
+    fill: var(--accent); /* Makes them solid gold when selected */
+    transform: scale(1.1);
+}
+
+/* --- PREMIUM USE CASE ICONS --- */
+.use-case-icon-wrapper {
+    width: 54px;
+    height: 54px;
+    background: rgba(212, 175, 55, 0.08); /* Subtle Gold Tint */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.use-case-icon {
+    width: 26px;
+    height: 26px;
+    stroke: var(--accent); /* Lagos Gold */
+    stroke-width: 2px;
+}
+
+/* Hover Effects */
+.case-card:hover .use-case-icon-wrapper {
+    transform: translateY(-5px) rotate(-5deg);
+    background: rgba(212, 175, 55, 0.15);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+}
+
+.case-card h3 {
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+/* --- PREMIUM CORE SOLUTIONS ICONS --- */
+.solution-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    background: rgba(212, 175, 55, 0.05); /* Very subtle gold tint */
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    border: 1px solid var(--card-border);
+    transition: all 0.4s ease;
+}
+
+.solution-icon {
+    width: 22px;
+    height: 22px;
+    stroke: var(--accent); /* Lagos Gold */
+    stroke-width: 1.5px;
+}
+
+/* Interaction: Icon glows on feature hover */
+.feature-item:hover .solution-icon-wrapper {
+    border-color: var(--accent);
+    background: rgba(212, 175, 55, 0.1);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+.feature-top h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+/* --- ICON ROTATION ANIMATION --- */
+
+/* Base state for the wrapper */
+.solution-icon-wrapper {
+    /* ... keep your existing styles ... */
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform; /* Optimizes for smoother animation */
+}
+
+/* Base state for the icon itself */
+.solution-icon {
+    /* ... keep your existing styles ... */
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* HOVER STATES */
+
+/* Rotate the whole wrapper slightly */
+.feature-item:hover .solution-icon-wrapper {
+    transform: translateY(-5px) rotate(8deg); /* Slight lift and tilt */
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--accent);
+}
+
+/* Rotate the actual icon inside in the opposite direction for a "complex" feel */
+.feature-item:hover .solution-icon {
+    transform: rotate(-12deg) scale(1.1);
+    stroke-width: 2px; /* Makes the icon look "bolder" on hover */
+}
+
+.cta-massive:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.1);
+}
+
+/* --- COOKED PRICING BUTTONS --- */
+
+.price-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    margin-top: auto; /* Pushes button to the bottom of the card */
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-align: center;
+    text-decoration: none !important; /* Removes the purple/blue underline */
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+}
+
+/* Secondary/Standard Buttons (Starter & Agency) */
+.price-btn:not(.gold):hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--subtext);
+    transform: translateY(-3px);
+}
+
+/* The "Pro" Featured Button (The Gold/High-Contrast Look) */
+.price-btn.gold {
+    background: var(--accent); /* Your Lagos Gold */
+    color: #000;              /* Deep black for maximum contrast */
+    border: 1px solid var(--accent);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+}
+
+.price-btn.gold:hover {
+    background: #e5be40;      /* Slightly brighter gold */
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+}
+
+/* Alternative Pro Look: Solid White (Very Pxxl/Linear style) */
+/* If you want the Pro button to be White instead of Gold, use this: */
+/*
+.price-btn.gold {
+    background: var(--text); 
+    color: var(--bg);
+    border: 1px solid var(--text);
+}
+*/
+
+.price-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 500px; /* Adjust based on your content */
+    /* ... keep your existing glass-panel styles ... */
+}
+
+.plan-features {
+    flex-grow: 1; /* This pushes the button to the bottom */
+    list-style: none;
+    padding: 0;
+    margin: 25px 0;
+}
+
+/* --- EXTENSIVE PROFESSIONAL FOOTER --- */
+.main-footer {
+    background: var(--bg);
+    padding: 80px 5% 40px;
+    border-top: 1px solid var(--card-border);
+    margin-top: 100px;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 80px;
+}
+
+.footer-brand .logo {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand-tagline {
+    color: var(--subtext);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 280px;
+    margin-bottom: 24px;
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+
+.social-links a {
+    color: var(--subtext);
+    transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+    color: var(--accent);
+}
+
+.footer-links-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.footer-col h4 {
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.footer-col a {
+    display: block;
+    color: var(--subtext);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+.footer-col a:hover {
+    color: var(--text);
+    padding-left: 5px; /* Subtle "push" effect on hover */
+}
+
+/* Legal Bottom Bar */
+.footer-legal {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--subtext);
+    font-size: 0.85rem;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.03);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981; /* Success Green */
+    border-radius: 50%;
+    box-shadow: 0 0 8px #10b981;
+}
+
+/* Mobile Responsive Footer */
+@media (max-width: 768px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    .footer-links-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* --- FINAL CTA SECTION (EDEN STYLE) --- */
+
+.final-cta {
+    padding: 100px 5%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #0B0B0F, #000); /* Fade into footer */
+}
+
+.cta-container {
+    width: 100%;
+    max-width: 1000px;
+    padding: 80px 40px;
+    background: rgba(22, 22, 28, 0.4);
+    border: 1px solid var(--card-border);
+    border-radius: 40px;
+    backdrop-filter: var(--glass);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Lagos Gold Glow behind the card */
+.cta-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.cta-vegan-icon {
+    color: var(--accent);
+    width: 40px;
+    height: 40px;
+    margin-bottom: 24px;
+    transform: rotate(-15deg);
+    filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
+}
+
+.cta-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.cta-description {
+    color: var(--subtext);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+}
+
+.cta-button-group {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.cta-btn-primary {
+    background: #fff;
+    color: #000;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cta-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--card-border);
+    transition: background 0.3s ease;
+}
+
+.cta-btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1);
+}
+
+.cta-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.cta-status {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    opacity: 0.6;
+}
+
+.pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: cta-pulse 2s infinite;
+}
+
+@keyframes cta-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.4; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .cta-title { font-size: 2.2rem; }
+    .cta-button-group { flex-direction: column; width: 100%; }
+    .cta-btn-primary, .cta-btn-secondary { width: 100%; text-align: center; }
+}
+
+/* --- CTA BUBBLE ANIMATION STYLES --- */
+
+.cta-container {
+    overflow: hidden; /* Clips the bubbles */
+    position: relative;
+    background: rgba(22, 22, 28, 0.6);
+    cursor: default;
+}
+
+.cta-content {
+    position: relative;
+    z-index: 10; /* Ensures text stays above bubbles */
+}
+
+/* The Bubbles */
+.bubble-stream {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.bubble {
+    position: absolute;
+    background: radial-gradient(circle at 30% 30%, rgba(212, 175, 55, 0.2), transparent);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    border-radius: 50%;
+    backdrop-filter: blur(4px);
+    animation: flowUp var(--duration) infinite ease-in-out;
+    bottom: -100px;
+}
+
+/* Individual Bubble Variations */
+.b1 { width: 80px; height: 80px; left: 10%; --duration: 8s; animation-delay: 0s; }
+.b2 { width: 120px; height: 120px; left: 25%; --duration: 12s; animation-delay: -2s; opacity: 0.5; }
+.b3 { width: 60px; height: 60px; left: 60%; --duration: 10s; animation-delay: -5s; }
+.b4 { width: 150px; height: 150px; left: 80%; --duration: 15s; animation-delay: -1s; opacity: 0.3; }
+.b5 { width: 40px; height: 40px; left: 45%; --duration: 7s; animation-delay: -3s; }
+
+@keyframes flowUp {
+    0% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0;
+    }
+    20% { opacity: 0.6; }
+    80% { opacity: 0.6; }
+    100% {
+        transform: translateY(-600px) translateX(40px) scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* Hover Effect: Mouse Interaction */
+.cta-container:hover .bubble {
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
+}
+
+/* ===== WAITLIST TEXT READABILITY FIX ===== */
+/* Root cause: --subtext (#8E8E93) is too faint on dark bg. Boost contrast for waitlist page */
+.waitlist-container p,
+.waitlist-container .muted,
+#waitlist-message,
+#code-email-display,
+#code-message,
+.waitlist-loading-copy {
+    color: #cbd5e1 !important; /* Higher contrast than --subtext */
+    font-weight: 500;
+    font-size: 0.98rem;
+}
+
+/* Boost placeholder text visibility in waitlist inputs */
+#waitlist-name::placeholder,
+#waitlist-email::placeholder,
+#waitlist-code::placeholder {
+    color: #a0aec0 !important; /* Lighter placeholder, still muted but visible */
+    opacity: 1;
+}
+/* =========================================================
+   HERO TESTIMONIAL PREVIEW  (was missing — caused hero card to look unstyled)
+   ========================================================= */
+.hero-testimonial-preview{
+    max-width:520px;
+    margin:44px auto 0;
+    padding:24px 28px;
+    background:var(--card-bg);
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    text-align:left;
+    position:relative;
+}
+.hero-testimonial-icon{font-size:2rem;color:var(--accent);line-height:1;margin-bottom:6px;}
+.hero-testimonial-badge{
+    display:inline-block;font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--accent);background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);
+    padding:4px 12px;border-radius:100px;margin-bottom:14px;
+}
+.hero-testimonial-quote{font-size:1.02rem;color:var(--text);line-height:1.55;font-style:italic;margin-bottom:16px;}
+.hero-testimonial-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.hero-testimonial-meta span{font-size:.85rem;color:var(--subtext);}
+.hero-testimonial-dots{display:flex;gap:6px;}
+.hero-testimonial-dots span{width:7px;height:7px;border-radius:50%;background:var(--card-border);transition:background .3s ease;}
+.hero-testimonial-dots span.active{background:var(--accent);}
+
+/* =========================================================
+   TESTIMONIAL CAROUSEL  ("Before We Launch" — was missing entirely,
+   which is why all 5 quotes stacked up unstyled)
+   ========================================================= */
+.testimonial-carousel{
+    position:relative;
+    max-width:780px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    gap:16px;
+}
+.testimonial-track{
+    position:relative;
+    flex:1;
+    min-width:0;
+}
+.testimonial-slide{
+    display:none;
+    background:var(--card-bg);
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    padding:52px 44px;
+    text-align:center;
+    backdrop-filter:blur(15px);
+    -webkit-backdrop-filter:blur(15px);
+}
+.testimonial-slide.active{
+    display:block;
+    animation:testiFade .5s cubic-bezier(.23,1,.32,1);
+}
+@keyframes testiFade{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.testimonial-slide .quote{
+    font-size:1.3rem;font-style:italic;color:var(--text);line-height:1.5;margin-bottom:26px;
+}
+.testimonial-slide .creator-info strong{display:block;font-size:1rem;color:var(--text);margin-bottom:4px;}
+.testimonial-slide .creator-info span{
+    font-size:.78rem;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;
+}
+.testimonial-nav{
+    flex-shrink:0;width:46px;height:46px;border-radius:50%;
+    border:1px solid var(--card-border);background:var(--card-bg);
+    color:var(--text);font-size:1.15rem;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .3s ease;backdrop-filter:blur(10px);
+}
+.testimonial-nav:hover{border-color:var(--accent);color:var(--accent);background:rgba(212,175,55,.08);transform:translateY(-2px);}
+
+/* dots */
+.testimonial-dots{display:flex;justify-content:center;gap:9px;margin-top:30px;}
+.testimonial-dot{
+    width:9px;height:9px;border-radius:50%;border:none;padding:0;
+    background:var(--card-border);cursor:pointer;transition:all .3s ease;
+}
+.testimonial-dot.active{background:var(--accent);transform:scale(1.3);}
+
+@media (max-width:640px){
+    .testimonial-carousel{gap:8px;}
+    .testimonial-slide{padding:38px 24px;}
+    .testimonial-slide .quote{font-size:1.1rem;}
+    .testimonial-nav{width:38px;height:38px;font-size:1rem;}
+}
+
+/* =========================================================
+   TYPE SCALE — DIALED DOWN (global size pass)
+   Headings use clamp() so they scale smoothly phone→desktop.
+   This block is last, so it overrides the oversized sizes above.
+   ========================================================= */
+
+/* --- Display / section headings --- */
+.hero h1            { font-size:clamp(2.1rem, 5.2vw, 3.3rem); line-height:1.08; }
+.offset-title       { font-size:clamp(1.9rem, 4.6vw, 2.9rem); line-height:1.05; }
+.use-cases-title    { font-size:clamp(1.8rem, 4.4vw, 2.7rem); }
+.testimonials-title { font-size:clamp(1.8rem, 4.4vw, 2.7rem); }
+.faq-title          { font-size:clamp(1.9rem, 4.6vw, 2.9rem); }
+.pricing-title      { font-size:clamp(1.9rem, 4.6vw, 2.9rem); }
+.cta-title          { font-size:clamp(1.7rem, 4vw, 2.5rem); }
+.modal-title        { font-size:clamp(1.9rem, 4.5vw, 2.6rem); }
+
+/* --- Supporting paragraphs under headings --- */
+.hero p                   { font-size:1rem; }
+.offset-description       { font-size:1rem; }
+.use-cases-description    { font-size:1.02rem; }
+.testimonials-description { font-size:1rem; }
+.faq-description          { font-size:1.02rem; }
+.pricing-description      { font-size:1.02rem; }
+.cta-description          { font-size:1rem; }
+
+/* --- Cards & smaller titles --- */
+.case-card h3        { font-size:1.2rem; }
+.faq-card h3         { font-size:1.1rem; }
+.feature-item h3     { font-size:0.9rem; }
+.feature-item p      { font-size:0.95rem; }
+.case-card p         { font-size:0.95rem; }
+.faq-card p          { font-size:0.95rem; }
+
+/* --- Testimonials --- */
+.testimonial-slide .quote { font-size:1.15rem; }
+.hero-testimonial-quote   { font-size:0.98rem; }
+
+/* --- Big stat numbers / price --- */
+.metric-number { font-size:2.6rem; }
+.plan-price    { font-size:3rem; }
+.accent-text   { font-size:2.6rem; }
+
+/* --- Footer "do next" style heading already uses offset-title, covered above --- */
+
+
+/* ===== custom scrollbar — Scrabl dark/gold ===== */
+*{scrollbar-width:thin;scrollbar-color:#2e2e34 transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2e2e34;border-radius:8px;border:2px solid #0A0A0B}
+::-webkit-scrollbar-thumb:hover{background:#D4AF37}

@@ -321,20 +321,47 @@
       if(platforms.length===0){ note.className='note err'; note.textContent='Pick at least one platform.'; return; }
       genBtn.disabled=true; genBtn.textContent='Generating…';
       area.innerHTML=loadingHTML(platforms.length);
-      fetch(backendBase+'/api/generate', {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-        body:JSON.stringify({ input:input, platforms:platforms })
-      })
-      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,status:r.status,d:d}; }); })
-      .then(function(res){
-        genBtn.disabled=false; genBtn.textContent='Generate';
-        if(res.status===401){ location.href='signup.html#login'; return; }
-        if(!res.ok || !res.d || !res.d.results){ area.innerHTML=''; note.className='note err'; note.textContent=(res.d&&res.d.error)||'Could not generate. Try again.'; return; }
-        renderResults(res.d.results, input);
-        saveRecent(input, res.d.results);
-      })
-      .catch(function(){ genBtn.disabled=false; genBtn.textContent='Generate'; area.innerHTML=''; note.className='note err'; note.textContent='Could not reach the server. Check your connection and try again.'; });
+
+      var MAX_TRIES=4;        // retry transient overloads so the user never sees a hard fail
+      function attempt(n){
+        fetch(backendBase+'/api/generate', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          body:JSON.stringify({ input:input, platforms:platforms })
+        })
+        .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,status:r.status,d:d}; }, function(){ return {ok:r.ok,status:r.status,d:null}; }); })
+        .then(function(res){
+          if(res.status===401){ location.href='signup.html#login'; return; }
+          // Google busy / transient server error → wait a moment and try again on our own.
+          var busy = (res.status===503 || res.status===429 || res.status===502 || res.status===504);
+          if(busy && n < MAX_TRIES){
+            setBusyNote(n);
+            setTimeout(function(){ attempt(n+1); }, 900*n);
+            return;
+          }
+          genBtn.disabled=false; genBtn.textContent='Generate';
+          if(!res.ok || !res.d || !res.d.results){
+            area.innerHTML=''; note.className='note err';
+            note.textContent=(res.d&&res.d.error)||'Could not generate just now — give it a few seconds and tap Generate again.';
+            return;
+          }
+          renderResults(res.d.results, input);
+          saveRecent(input, res.d.results);
+        })
+        .catch(function(){
+          // Network blip → also retry a couple of times before giving up.
+          if(n < MAX_TRIES){ setBusyNote(n); setTimeout(function(){ attempt(n+1); }, 900*n); return; }
+          genBtn.disabled=false; genBtn.textContent='Generate';
+          area.innerHTML=''; note.className='note err';
+          note.textContent='Could not reach the server. Check your connection and try again.';
+        });
+      }
+      function setBusyNote(n){
+        note.className='note';
+        note.textContent='Polishing your post… one sec';
+        area.innerHTML=loadingHTML(platforms.length);
+      }
+      attempt(1);
     }
     function loadingHTML(n){
       var c=''; for(var i=0;i<n;i++){ c+='<div class="res"><div class="rbody"><div class="skel" style="width:40%"></div><div class="skel"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:60%"></div></div></div>'; }

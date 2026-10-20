@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   /* custom scrollbar — Scrabl dark/gold */
   *{scrollbar-width:thin;scrollbar-color:#2e2e34 transparent}
@@ -111,13 +112,17 @@
       <h1 class="headline" id="headline">Create your account<span class="dot">.</span></h1>
       <p class="subhead" id="subhead">Start showing up every day — without the stress.</p>
 
-      <!-- Google (styled, not wired yet) -->
-      <button type="button" class="google-btn" id="google-btn">
-        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Continue with Google
-      </button>
+      <!-- Google — your styled button, with the REAL Google button overlaid invisibly on top -->
+      <div id="gwrap" style="position:relative">
+        <button type="button" class="google-btn" id="google-btn">
+          <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+        <div id="gbtn-host" style="position:absolute;inset:0;opacity:0.01;overflow:hidden;display:flex;align-items:center;justify-content:center"></div>
+      </div>
+      <div class="form-note" id="g-note" style="text-align:center"></div>
 
-      <div class="divider"><span>or</span></div>
+      <div class="divider" id="or-divider"><span>or</span></div>
 
       <!-- ============ SIGNUP FORM ============ -->
       <form id="signup-form" novalidate>
@@ -399,6 +404,7 @@
     document.getElementById('login-form').style.display = 'none';
     document.getElementById('legal').style.display = 'none';
     document.getElementById('switch-row').style.display = 'none';
+    ['gwrap','g-note','or-divider'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
     document.getElementById('verify-view').style.display = 'block';
     headline.innerHTML = 'Check your email<span class="dot">.</span>';
     subhead.textContent = 'Enter the 6-digit code we just sent you.';
@@ -479,11 +485,66 @@
     setTimeout(function(){ btn.disabled = false; btn.textContent = original; }, 2000);
   });
 
-  document.getElementById('google-btn').addEventListener('click', function(){
-    var note = document.getElementById(mode === 'signup' ? 'su-note' : 'li-note');
-    note.style.color = 'var(--subtext)';
-    note.textContent = 'Google sign-in is coming in the next step.';
-  });
+  // ----- Continue with Google (real) -----
+  (function(){
+    var host = document.getElementById('gbtn-host');
+    var custom = document.getElementById('google-btn');
+    var gnote = document.getElementById('g-note');
+
+    function onCredential(response){
+      gnote.style.color = 'var(--subtext)';
+      gnote.textContent = 'Signing you in…';
+      fetch(backendBase + '/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+      })
+      .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }, function(){ return { ok:r.ok, d:null }; }); })
+      .then(function(res){
+        if(!res.ok || !res.d || !res.d.success){
+          gnote.style.color = 'var(--error)';
+          gnote.textContent = (res.d && res.d.error) || 'Google sign-in failed. Try again.';
+          return;
+        }
+        try{
+          localStorage.setItem('scrabl_token', res.d.token || '');
+          localStorage.setItem('scrabl_user', JSON.stringify(res.d.user || {}));
+        }catch(_){}
+        window.location.href = res.d.onboarded ? 'app.html' : 'onboarding.html';
+      })
+      .catch(function(){
+        gnote.style.color = 'var(--error)';
+        gnote.textContent = 'Could not reach the server. Try again.';
+      });
+    }
+
+    function sizeHostButton(clientId){
+      if(!(window.google && google.accounts && google.accounts.id)){
+        return setTimeout(function(){ sizeHostButton(clientId); }, 250);
+      }
+      google.accounts.id.initialize({ client_id: clientId, callback: onCredential });
+      host.innerHTML = '';
+      var w = Math.round(custom.getBoundingClientRect().width) || 300;
+      google.accounts.id.renderButton(host, { type:'standard', theme:'filled_black', size:'large', text:'continue_with', shape:'pill', width: Math.min(w, 400) });
+    }
+
+    fetch(backendBase + '/api/config')
+      .then(function(r){ return r.json(); })
+      .then(function(cfg){
+        if(cfg && cfg.googleClientId){
+          sizeHostButton(cfg.googleClientId);
+          // keep the overlaid Google button matched to the custom button width on resize
+          window.addEventListener('resize', function(){ sizeHostButton(cfg.googleClientId); });
+        } else {
+          // Not configured yet — custom button just explains
+          custom.addEventListener('click', function(){
+            gnote.style.color = 'var(--subtext)';
+            gnote.textContent = 'Google sign-in isn’t set up yet.';
+          });
+        }
+      })
+      .catch(function(){});
+  })();
 
   if (location.hash === '#login' || /[?&]mode=login/.test(location.search)) {
     switchBtn.click();

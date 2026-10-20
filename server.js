@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { OAuth2Client } = require('google-auth-library');
 require('dotenv').config();
 const { promisify } = require('util');
 const scryptAsync = promisify(crypto.scrypt);
@@ -51,6 +52,12 @@ try {
     geminiInitError = error.message || 'Failed to initialize Gemini client.';
     console.warn('⚠️  Failed to initialize Gemini client:', geminiInitError);
 }
+
+// Google "Continue with Google" sign-in
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
+if (GOOGLE_CLIENT_ID) console.log('✅ Google sign-in configured');
+else console.warn('⚠️  GOOGLE_CLIENT_ID not set — "Continue with Google" is disabled.');
 
 // Middleware
 app.use(cors());
@@ -140,7 +147,9 @@ const Feedback = mongoose.model('Feedback', feedbackSchema);
 const userSchema = new mongoose.Schema({
     name:         { type: String, default: '' },
     email:        { type: String, required: true, unique: true, lowercase: true, trim: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, default: '' },         // empty for Google-only accounts
+    googleId:     { type: String, default: '' },         // Google 'sub' id when they use Continue with Google
+    authProvider: { type: String, default: 'email' },    // 'email' | 'google'
     verified:     { type: Boolean, default: false },
     verifyCode:        { type: String, default: '' },
     verifyCodeExpires: { type: Date },
@@ -597,6 +606,73 @@ app.post('/api/auth/login', async (req, res) => {
         console.error('Login error:', err);
         return res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
+});
+
+// ========== AUTH: CONTINUE WITH GOOGLE ==========
+app.post('/api/auth/google', async (req, res) => {
+    try {
+        if (!googleClient) return res.status(503).json({ error: 'Google sign-in is not set up yet.' });
+        const credential = req.body?.credential || '';
+        if (!credential) return res.status(400).json({ error: 'Missing Google credential.' });
+
+        let payload;
+        try {
+            const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
+            payload = ticket.getPayload();
+        } catch (e) {
+            console.warn('Google token verify failed:', e.message);
+            return res.status(401).json({ error: 'Google sign-in failed. Please try again.' });
+        }
+
+        const email = (payload.email || '').toLowerCase();
+        if (!email || payload.email_verified === false) {
+            return res.status(401).json({ error: 'Could not verify your Google email.' });
+        }
+        const name = payload.name || email.split('@')[0];
+
+        let user = await User.findOne({ email });
+        if (!user) {
+            // Brand-new account via Google — already email-verified by Google
+            user = await User.create({
+                name, email,
+                passwordHash: '',
+                googleId: payload.sub || '',
+                authProvider: 'google',
+                verified: true,
+                onboarded: false
+            });
+            console.log('🆕 Google signup: ' + email);
+        } else {
+            // Existing account — link Google to it and mark verified
+            let changed = false;
+            if (!user.googleId && payload.sub) { user.googleId = payload.sub; changed = true; }
+            if (!user.verified) { user.verified = true; changed = true; }
+            if (changed) await user.save();
+            console.log('🔑 Google login: ' + email);
+        }
+
+        const token = signToken({
+            id: user._id.toString(),
+            email: user.email,
+            exp: Date.now() + 7 * 24 * 60 * 60 * 1000
+        });
+
+        return res.status(200).json({
+            success: true,
+            token,
+            verified: true,
+            onboarded: !!user.onboarded,
+            user: { id: user._id, name: user.name, email: user.email }
+        });
+    } catch (err) {
+        console.error('Google auth error:', err);
+        return res.status(500).json({ error: 'Something went wrong. Please try again.' });
+    }
+});
+
+// Public config the frontend needs (e.g. the Google client id for the sign-in button)
+app.get('/api/config', (req, res) => {
+    res.json({ googleClientId: GOOGLE_CLIENT_ID || '' });
 });
 
 // ========== AUTH: VERIFY EMAIL ==========

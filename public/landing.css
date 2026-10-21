@@ -55,10 +55,36 @@ nav .wrap{height:66px;display:flex;align-items:center;justify-content:space-betw
 .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px}
 .burger span{width:22px;height:2px;background:var(--text);border-radius:2px;transition:.3s}
 
-.mnav{position:fixed;inset:0;z-index:60;background:rgba(10,10,11,.97);backdrop-filter:blur(20px);display:none;flex-direction:column;justify-content:center;padding:0 10%;gap:6px}
+/* ===== Mobile menu — minimal luxury ===== */
+.mnav{position:fixed;inset:0;z-index:60;background:radial-gradient(135% 100% at 50% 0%,#141418 0%,#0A0A0B 55%);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);display:none;flex-direction:column;padding:26px 30px 36px;overflow:hidden}
 .mnav.open{display:flex}
-.mnav a{color:var(--text);text-decoration:none;font-size:1.5rem;font-weight:400;padding:18px 0;border-bottom:1px solid var(--line)}
-.mnav .x{position:absolute;top:22px;right:24px;font-size:1.8rem;color:var(--muted);cursor:pointer;background:none;border:none}
+.mnav::before{content:"";position:absolute;inset:0;background:radial-gradient(55% 40% at 82% 88%,rgba(212,175,55,.07),transparent 70%);pointer-events:none}
+.mnav-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.mnav-logo{display:flex;align-items:center;gap:9px;font-size:1.15rem;font-weight:600;letter-spacing:-.02em;color:var(--text);text-decoration:none}
+.mnav-logo .mk{color:var(--gold);display:grid;place-items:center}
+.mnav-logo .mk svg{width:22px;height:22px}
+.mnav-x{width:42px;height:42px;border-radius:50%;border:1px solid var(--line-2);background:rgba(255,255,255,.02);color:var(--text);display:grid;place-items:center;cursor:pointer;transition:.25s}
+.mnav-x:hover{border-color:var(--gold);color:var(--gold);transform:rotate(90deg)}
+.mnav-x svg{width:17px;height:17px}
+.mnav-links{flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1}
+.m-item{display:flex;align-items:center;gap:18px;padding:22px 4px;text-decoration:none;color:var(--text);border-top:1px solid var(--line);opacity:0;transform:translateY(22px);transition:opacity .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1)}
+.m-item:last-of-type{border-bottom:1px solid var(--line)}
+.mnav.open .m-item{opacity:1;transform:none}
+.mnav.open .m-item:nth-child(1){transition-delay:.10s}
+.mnav.open .m-item:nth-child(2){transition-delay:.17s}
+.mnav.open .m-item:nth-child(3){transition-delay:.24s}
+.mnav.open .m-item:nth-child(4){transition-delay:.31s}
+.mi-n{font-size:.72rem;font-weight:500;color:var(--gold);letter-spacing:.1em;width:20px;flex-shrink:0;opacity:.9}
+.mi-t{font-size:1.9rem;font-weight:300;letter-spacing:-.02em;line-height:1;flex:1}
+.mi-a{color:var(--faint);font-size:1.15rem;transition:.25s;transform:translateX(-6px);opacity:0}
+.m-item:hover .mi-t,.m-item:active .mi-t{color:var(--gold-soft)}
+.m-item:hover .mi-a,.m-item:active .mi-a{color:var(--gold);transform:none;opacity:1}
+.mnav-foot{position:relative;z-index:1;opacity:0;transform:translateY(16px);transition:opacity .6s .42s,transform .6s .42s}
+.mnav.open .mnav-foot{opacity:1;transform:none}
+.mnav-cta{display:block;text-align:center;background:var(--gold);color:#0A0A0B;font-weight:600;font-size:1.02rem;padding:16px;border-radius:14px;text-decoration:none;margin-bottom:18px;transition:.2s}
+.mnav-cta:hover{background:var(--gold-soft);transform:translateY(-1px)}
+.mnav-sig{display:flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;color:var(--faint);letter-spacing:.02em}
+.mnav-sig .dot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
 
 
 /* ---------------- HERO ---------------- */

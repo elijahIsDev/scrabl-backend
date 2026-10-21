@@ -117,6 +117,17 @@
     .ritem .rt{font-size:.95rem;font-weight:400;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .ritem .rd{font-size:.74rem;color:var(--faint);flex-shrink:0}
     .empty{color:var(--faint);font-size:.95rem;font-weight:300;padding:28px 0}
+    /* notebook */
+    .ncard{border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;transition:border-color .15s}
+    .ncard:hover{border-color:var(--line-2)}
+    .ncard .ntext{font-size:.98rem;line-height:1.55;color:var(--text);white-space:pre-wrap;word-break:break-word}
+    .ncard .nmeta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}
+    .ncard .nd{font-size:.74rem;color:var(--faint);flex-shrink:0}
+    .ncard .nactions{display:flex;gap:8px;flex-wrap:wrap}
+    .nbtn{background:transparent;border:1px solid var(--line-2);color:var(--muted);border-radius:9px;padding:7px 13px;font-size:.82rem;font-weight:500;font-family:inherit;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+    .nbtn svg{width:14px;height:14px}
+    .nbtn.turn:hover{border-color:var(--gold);color:var(--gold-soft)}
+    .nbtn.del:hover{border-color:#e06666;color:#e98b8b}
     /* ---------- HOME (calm welcome) ---------- */
     .hero{margin-bottom:30px}
     #greet{font-size:clamp(2rem,4.6vw,2.9rem);font-weight:500;letter-spacing:-.035em;line-height:1.08}
@@ -221,7 +232,7 @@
         <button data-view="home" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 11l8-6 8 6M6 10v9h12v-9" stroke-linecap="round" stroke-linejoin="round"/></svg>Home</button>
         <button data-view="studio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 13c2 0 2-5 4-5s2 8 4 8 2-10 4-10 2 5 4 5" stroke-linecap="round"/></svg>Studio</button>
         <button data-view="soon" data-label="gist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8 8 0 0 1-11 7l-5 2 2-4.5A8 8 0 1 1 21 11.5Z" stroke-linejoin="round"/></svg>Let's Gist</button>
-        <button data-view="soon" data-label="notebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h6M9 16h4" stroke-linecap="round"/></svg>Notebook</button>
+        <button data-view="notebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h6M9 16h4" stroke-linecap="round"/></svg>Notebook</button>
         <button class="soon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 18l5-6 4 4 7-9" stroke-linecap="round" stroke-linejoin="round"/></svg>Trends</button>
         <button data-view="soon" data-label="projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h6l2 2h8v10H4z" stroke-linecap="round" stroke-linejoin="round"/></svg>Projects</button>
         <button data-view="voice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="9" r="3.2"/><path d="M6 20c0-3.3 2.7-5 6-5s6 1.7 6 5" stroke-linecap="round"/></svg>My Voice</button>
@@ -332,6 +343,22 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- NOTEBOOK -->
+      <section class="view" id="v-notebook">
+        <div class="eyebrow">Notebook</div>
+        <h1>Notebook<span class="g">.</span></h1>
+        <p class="sub">Catch a thought the second it lands. Scrabl holds it — turn any note into a post when you’re ready.</p>
+        <div class="card" style="margin-top:24px">
+          <label class="fld" for="noteInput">New note</label>
+          <textarea id="noteInput" placeholder="A hook, a hot take, a half-formed idea… drop it here."></textarea>
+          <div style="margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <button class="btn-gold" id="noteSaveBtn">Save note</button>
+            <span style="font-size:.84rem;color:var(--faint)" id="noteCount"></span>
+          </div>
+        </div>
+        <div class="notes" id="notesList" style="margin-top:28px"></div>
       </section>
 
       <!-- MY VOICE -->
@@ -723,6 +750,59 @@
       });
     }
     function timeAgo(ts){ var s=Math.floor((Date.now()-ts)/1000); if(s<60)return 'just now'; var m=Math.floor(s/60); if(m<60)return m+'m ago'; var h=Math.floor(m/60); if(h<24)return h+'h ago'; return Math.floor(h/24)+'d ago'; }
+
+    // ----- notebook (captured ideas, stored per account) -----
+    var NOTES=[];
+    function setNotes(list){ NOTES=Array.isArray(list)?list:[]; renderNotes(); }
+    function renderNotes(){
+      var el=document.getElementById('notesList'), cnt=document.getElementById('noteCount');
+      if(cnt) cnt.textContent = NOTES.length ? (NOTES.length+(NOTES.length===1?' note saved':' notes saved')) : '';
+      if(!el) return;
+      if(!NOTES.length){ el.innerHTML='<div class="empty">Nothing here yet. Jot a thought above and Scrabl will keep it for you.</div>'; return; }
+      el.innerHTML='';
+      NOTES.forEach(function(n){
+        var d=document.createElement('div'); d.className='ncard';
+        d.innerHTML='<p class="ntext">'+esc(n.text)+'</p>'+
+          '<div class="nmeta"><span class="nd">'+timeAgo(n.ts)+'</span>'+
+          '<div class="nactions">'+
+            '<button class="nbtn turn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>Turn into post</button>'+
+            '<button class="nbtn del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>Delete</button>'+
+          '</div></div>';
+        d.querySelector('.turn').addEventListener('click', function(){ turnNote(n.text); });
+        d.querySelector('.del').addEventListener('click', function(){ deleteNote(n.id); });
+        el.appendChild(d);
+      });
+    }
+    function turnNote(text){
+      setMode('text');
+      var idea=document.getElementById('idea'); if(idea) idea.value=text;
+      goStudio();
+      toast('Dropped into the Studio — shape it your way', 'info', 2200);
+    }
+    function saveNote(){
+      var ta=document.getElementById('noteInput'), btn=document.getElementById('noteSaveBtn');
+      var v=(ta.value||'').trim();
+      if(!v){ toast('Write something first.', 'error'); return; }
+      btn.disabled=true;
+      fetch(backendBase+'/api/me/notes',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({text:v})})
+        .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+        .then(function(res){
+          if(res.ok && res.j.success && res.j.note){ NOTES.unshift(res.j.note); renderNotes(); ta.value=''; toast('Note saved', 'success'); }
+          else { toast(res.j.error||'Could not save your note.', 'error'); }
+        })
+        .catch(function(){ toast('Network error. Try again.', 'error'); })
+        .then(function(){ btn.disabled=false; });
+    }
+    function deleteNote(id){
+      var keep=NOTES.slice(); NOTES=NOTES.filter(function(n){ return n.id!==id; }); renderNotes();
+      fetch(backendBase+'/api/me/notes/delete',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({id:id})})
+        .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+        .then(function(res){
+          if(res.ok && res.j.success){ toast('Note deleted', 'info', 1600); }
+          else { NOTES=keep; renderNotes(); toast(res.j.error||'Could not delete that note.', 'error'); }
+        })
+        .catch(function(){ NOTES=keep; renderNotes(); toast('Network error. Try again.', 'error'); });
+    }
     // ME = this account's server-side data (profile + voiceDNA). Loaded on boot so
     // voice works on ANY device, not just the browser where the user onboarded.
     var ME=null, hasVoiceDNA=false;
@@ -777,6 +857,7 @@
             paintHandle(d.username||'');
             // Server history is authoritative when it has anything — survives a new phone / private mode.
             if(Array.isArray(d.recent) && d.recent.length){ setRecent(d.recent); }
+            setNotes(Array.isArray(d.notes)?d.notes:[]);
             // keep the cached user in sync so a reload shows the right name/photo instantly
             try{ var u=JSON.parse(localStorage.getItem('scrabl_user')||'{}'); u.name=d.name||u.name; u.avatar=d.avatar||''; u.username=d.username||''; localStorage.setItem('scrabl_user',JSON.stringify(u)); }catch(_){}
             if(d.email){ document.getElementById('setEmail').textContent=d.email; document.getElementById('pe').textContent='@'+d.email.split('@')[0].toLowerCase().replace(/[^a-z0-9._]/g,''); }
@@ -792,7 +873,12 @@
       toast('Welcome back, '+nm, 'success');
     }
     setTimeout(hideBoot, 3500); // safety: never leave the loader stuck
-    renderRecent(); updateVoice(); renderVoice(); loadMe();
+    renderRecent(); updateVoice(); renderVoice(); renderNotes(); loadMe();
+    (function(){
+      var nb=document.getElementById('noteSaveBtn'); if(nb) nb.addEventListener('click', saveNote);
+      var ni=document.getElementById('noteInput');
+      if(ni) ni.addEventListener('keydown', function(e){ if((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); saveNote(); } });
+    })();
 
     document.getElementById('logoutBtn').addEventListener('click', function(){
       toast('Signing you out…', 'info', 1200);

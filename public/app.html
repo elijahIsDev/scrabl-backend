@@ -148,8 +148,8 @@
     .door-arrow svg{width:19px;height:19px}
     .door:hover .door-arrow{background:var(--gold);color:#0A0A0B;transform:translateX(3px)}
     /* ---------- TOASTS ---------- */
-    .toast-host{position:fixed;left:0;right:0;bottom:26px;z-index:1200;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;padding:0 16px}
-    .toast{display:flex;align-items:center;gap:11px;max-width:420px;background:#16161a;border:1px solid var(--line-2);border-radius:13px;padding:13px 18px;color:var(--text);font-size:.92rem;box-shadow:0 16px 40px rgba(0,0,0,.5);opacity:0;transform:translateY(14px);transition:opacity .28s,transform .28s;pointer-events:auto}
+    .toast-host{position:fixed;left:0;right:0;top:24px;z-index:1600;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;padding:0 16px}
+    .toast{display:flex;align-items:center;gap:11px;max-width:420px;background:#16161a;border:1px solid var(--line-2);border-radius:13px;padding:13px 18px;color:var(--text);font-size:.92rem;box-shadow:0 16px 40px rgba(0,0,0,.5);opacity:0;transform:translateY(-14px);transition:opacity .28s,transform .28s;pointer-events:auto}
     .toast.show{opacity:1;transform:none}
     .toast svg{width:19px;height:19px;flex-shrink:0}
     .toast.success svg{color:#5bd98a}
@@ -209,6 +209,7 @@
       .rail.open{transform:none}
       .scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:80;opacity:0;pointer-events:none;transition:opacity .25s}
       .scrim.open{opacity:1;pointer-events:auto}
+      .toast-host{top:70px}
     }
   </style>
 </head>

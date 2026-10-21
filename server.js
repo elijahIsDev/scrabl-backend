@@ -157,6 +157,7 @@ const userSchema = new mongoose.Schema({
     onboarded:    { type: Boolean, default: false },
     avatar:       { type: String, default: '' },         // small data-URL profile picture (resized client-side)
     recent:       { type: Array, default: [] },          // last few generations {input, results, ts, mode} — survives device/browser
+    notes:        { type: Array, default: [] },           // Notebook: captured ideas {id, text, ts} — per account, cross-device
     profile:      { type: Object, default: {} },
     voiceDNA:     { type: Object, default: null },
     voiceDNAUpdatedAt: { type: Date },
@@ -820,6 +821,7 @@ app.get('/api/me', async (req, res) => {
             username: user.username || '',
             avatar: user.avatar || '',
             recent: Array.isArray(user.recent) ? user.recent : [],
+            notes: Array.isArray(user.notes) ? user.notes : [],
             onboarded: !!user.onboarded,
             profile: user.profile || {},
             voiceDNA: user.voiceDNA || null,
@@ -882,6 +884,61 @@ app.post('/api/me/username', async (req, res) => {
     } catch (err) {
         console.error('Username update error:', err);
         return res.status(500).json({ error: 'Could not save your username.' });
+    }
+});
+
+// ========== NOTEBOOK: captured ideas, stored per account ==========
+
+// Add a note
+app.post('/api/me/notes', async (req, res) => {
+    try {
+        const auth = req.headers.authorization || '';
+        const token = auth.startsWith('Bearer ') ? auth.slice(7) : (req.body?.token || '');
+        const payload = verifyToken(token);
+        if (!payload) return res.status(401).json({ error: 'Please log in again.' });
+
+        let text = (req.body?.text || '').trim();
+        if (!text) return res.status(400).json({ error: 'Write something first.' });
+        if (text.length > 2000) text = text.slice(0, 2000);
+
+        const user = await User.findById(payload.id);
+        if (!user) return res.status(404).json({ error: 'Account not found.' });
+
+        const note = { id: 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), text: text, ts: Date.now() };
+        const prev = Array.isArray(user.notes) ? user.notes : [];
+        user.notes = [note].concat(prev).slice(0, 200);
+        user.markModified('notes');
+        await user.save();
+        console.log('📓 Note added: ' + user.email);
+        return res.status(200).json({ success: true, note: note });
+    } catch (err) {
+        console.error('Note add error:', err);
+        return res.status(500).json({ error: 'Could not save your note.' });
+    }
+});
+
+// Delete a note by id
+app.post('/api/me/notes/delete', async (req, res) => {
+    try {
+        const auth = req.headers.authorization || '';
+        const token = auth.startsWith('Bearer ') ? auth.slice(7) : (req.body?.token || '');
+        const payload = verifyToken(token);
+        if (!payload) return res.status(401).json({ error: 'Please log in again.' });
+
+        const id = (req.body?.id || '').trim();
+        if (!id) return res.status(400).json({ error: 'Missing note id.' });
+
+        const user = await User.findById(payload.id);
+        if (!user) return res.status(404).json({ error: 'Account not found.' });
+
+        const prev = Array.isArray(user.notes) ? user.notes : [];
+        user.notes = prev.filter(function (n) { return n && n.id !== id; });
+        user.markModified('notes');
+        await user.save();
+        return res.status(200).json({ success: true });
+    } catch (err) {
+        console.error('Note delete error:', err);
+        return res.status(500).json({ error: 'Could not delete that note.' });
     }
 });
 

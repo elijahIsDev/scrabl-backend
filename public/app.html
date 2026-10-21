@@ -170,6 +170,10 @@
     .field-row{display:flex;gap:9px;align-items:center}
     .field-row input{flex:1;background:var(--bg);border:1px solid var(--line-2);border-radius:9px;padding:11px 13px;color:var(--text);font-size:.98rem;font-family:inherit;outline:none;transition:border-color .15s}
     .field-row input:focus{border-color:var(--gold)}
+    .field-row .at{color:var(--faint);font-size:1rem;flex-shrink:0;margin-right:-3px}
+    .field .hint{font-size:.74rem;color:var(--faint);margin-top:8px}
+    .field .hint.err{color:#f0776c}
+    .field .hint.ok{color:#5bd98a}
     .btn-save{background:var(--gold);color:#121212;border:none;border-radius:9px;padding:11px 18px;font-size:.9rem;font-weight:600;cursor:pointer;transition:.15s;flex-shrink:0}
     .btn-save:hover{background:var(--gold-soft)}
     .btn-save:disabled{opacity:.5;cursor:not-allowed}
@@ -362,6 +366,15 @@
               <button class="btn-save" id="nameSave">Save</button>
             </div>
           </div>
+          <div class="field">
+            <div class="il">Username</div>
+            <div class="field-row">
+              <span class="at">@</span>
+              <input type="text" id="userInput" maxlength="20" placeholder="username" autocomplete="off" autocapitalize="none" spellcheck="false">
+              <button class="btn-save" id="userSave">Save</button>
+            </div>
+            <div class="hint" id="userHint">3–20 characters · letters, numbers, dots, underscores</div>
+          </div>
           <div class="info"><div class="il">Email</div><div class="iv" id="setEmail">—</div></div>
           <button class="btn-ghost" id="logoutBtn" style="margin-top:8px">Log out</button>
         </div>
@@ -401,11 +414,20 @@
     try { localStorage.removeItem('scrabl_recent'); } catch(_){}
 
     var curAvatar = (user && user.avatar) ? user.avatar : '';
+    var curUsername = (user && user.username) ? user.username : '';
     document.getElementById('pn').textContent = name;
-    document.getElementById('pe').textContent = handle;
     document.getElementById('setEmail').textContent = email || '—';
     paintName(name);
     paintAvatar(curAvatar, name);
+    paintHandle(curUsername);
+
+    // The public @handle = chosen username, or an email-derived fallback until they set one.
+    function paintHandle(uname){
+      curUsername = uname || '';
+      var h = curUsername ? ('@'+curUsername) : handle;
+      var pe=document.getElementById('pe'); if(pe) pe.textContent=h;
+      var ui=document.getElementById('userInput'); if(ui && document.activeElement!==ui) ui.value=curUsername;
+    }
 
     // Paint the display name into every spot that shows it (sidebar + settings input).
     function paintName(nm){
@@ -752,10 +774,11 @@
             ME=d;
             if(d.name){ name=d.name; paintName(d.name); }
             paintAvatar(d.avatar||'', d.name||name);
+            paintHandle(d.username||'');
             // Server history is authoritative when it has anything — survives a new phone / private mode.
             if(Array.isArray(d.recent) && d.recent.length){ setRecent(d.recent); }
             // keep the cached user in sync so a reload shows the right name/photo instantly
-            try{ var u=JSON.parse(localStorage.getItem('scrabl_user')||'{}'); u.name=d.name||u.name; u.avatar=d.avatar||''; localStorage.setItem('scrabl_user',JSON.stringify(u)); }catch(_){}
+            try{ var u=JSON.parse(localStorage.getItem('scrabl_user')||'{}'); u.name=d.name||u.name; u.avatar=d.avatar||''; u.username=d.username||''; localStorage.setItem('scrabl_user',JSON.stringify(u)); }catch(_){}
             if(d.email){ document.getElementById('setEmail').textContent=d.email; document.getElementById('pe').textContent='@'+d.email.split('@')[0].toLowerCase().replace(/[^a-z0-9._]/g,''); }
           }
         })
@@ -810,6 +833,34 @@
         .then(function(){ nameSave.disabled=false; });
     });
     if(nameInput) nameInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); nameSave.click(); } });
+
+    // ----- settings: pick @username -----
+    var userInput=document.getElementById('userInput'), userSave=document.getElementById('userSave'), userHint=document.getElementById('userHint');
+    function setHint(msg, kind){ if(!userHint) return; userHint.textContent=msg; userHint.className='hint'+(kind?(' '+kind):''); }
+    if(userInput) userInput.addEventListener('input', function(){
+      // live-clean: lowercase, strip anything but a-z0-9._
+      var v=userInput.value.toLowerCase().replace(/[^a-z0-9._]/g,''); if(v!==userInput.value) userInput.value=v;
+      setHint('3–20 characters · letters, numbers, dots, underscores');
+    });
+    if(userSave) userSave.addEventListener('click', function(){
+      var v=(userInput.value||'').trim().toLowerCase().replace(/^@+/,'');
+      if(v.length<3||v.length>20){ setHint('Username must be 3–20 characters.','err'); return; }
+      if(!/^[a-z0-9._]+$/.test(v)){ setHint('Only letters, numbers, dots and underscores.','err'); return; }
+      if(!/^[a-z0-9]/.test(v)){ setHint('Must start with a letter or number.','err'); return; }
+      userSave.disabled=true; setHint('Checking…');
+      fetch(backendBase+'/api/me/username',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({username:v})})
+        .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+        .then(function(res){
+          if(res.ok && res.j.success){
+            paintHandle(res.j.username); if(typeof ME!=='undefined'&&ME) ME.username=res.j.username;
+            try{ var u=JSON.parse(localStorage.getItem('scrabl_user')||'{}'); u.username=res.j.username; localStorage.setItem('scrabl_user',JSON.stringify(u)); }catch(_){}
+            setHint('Saved — you’re @'+res.j.username,'ok'); toast('Username saved','success');
+          } else { setHint(res.j.error||'Could not save that username.','err'); toast(res.j.error||'Could not save username.','error'); }
+        })
+        .catch(function(){ setHint('Network error. Try again.','err'); toast('Network error. Try again.','error'); })
+        .then(function(){ userSave.disabled=false; });
+    });
+    if(userInput) userInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); userSave.click(); } });
 
     // ----- settings: profile picture -----
     var photoBtn=document.getElementById('photoBtn'), photoInput=document.getElementById('photoInput'), photoRemove=document.getElementById('photoRemove');

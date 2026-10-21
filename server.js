@@ -146,6 +146,7 @@ const Feedback = mongoose.model('Feedback', feedbackSchema);
 // User Schema + Model (auth)
 const userSchema = new mongoose.Schema({
     name:         { type: String, default: '' },
+    username:     { type: String, default: '', lowercase: true, trim: true },  // public @handle; uniqueness enforced in the route
     email:        { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, default: '' },         // empty for Google-only accounts
     googleId:     { type: String, default: '' },         // Google 'sub' id when they use Continue with Google
@@ -816,6 +817,7 @@ app.get('/api/me', async (req, res) => {
             success: true,
             email: user.email,
             name: user.name || '',
+            username: user.username || '',
             avatar: user.avatar || '',
             recent: Array.isArray(user.recent) ? user.recent : [],
             onboarded: !!user.onboarded,
@@ -850,6 +852,36 @@ app.post('/api/me/name', async (req, res) => {
     } catch (err) {
         console.error('Name update error:', err);
         return res.status(500).json({ error: 'Could not save your name.' });
+    }
+});
+
+// Let a user pick/change their public @username (unique, case-insensitive)
+app.post('/api/me/username', async (req, res) => {
+    try {
+        const auth = req.headers.authorization || '';
+        const token = auth.startsWith('Bearer ') ? auth.slice(7) : (req.body?.token || '');
+        const payload = verifyToken(token);
+        if (!payload) return res.status(401).json({ error: 'Please log in again.' });
+
+        let uname = (req.body?.username || '').trim().toLowerCase().replace(/^@+/, '');
+        if (!uname) return res.status(400).json({ error: 'Enter a username.' });
+        if (uname.length < 3 || uname.length > 20) return res.status(400).json({ error: 'Username must be 3–20 characters.' });
+        if (!/^[a-z0-9._]+$/.test(uname)) return res.status(400).json({ error: 'Use only letters, numbers, dots and underscores.' });
+        if (!/^[a-z0-9]/.test(uname)) return res.status(400).json({ error: 'Username must start with a letter or number.' });
+
+        // Must be unique across accounts (case-insensitive), ignoring the user's own current one.
+        const taken = await User.findOne({ username: uname, _id: { $ne: payload.id } }).select('_id');
+        if (taken) return res.status(409).json({ error: 'That username is taken. Try another.' });
+
+        const user = await User.findById(payload.id);
+        if (!user) return res.status(404).json({ error: 'Account not found.' });
+        user.username = uname;
+        await user.save();
+        console.log('🏷️ Username set: ' + user.email + ' -> @' + uname);
+        return res.status(200).json({ success: true, username: user.username });
+    } catch (err) {
+        console.error('Username update error:', err);
+        return res.status(500).json({ error: 'Could not save your username.' });
     }
 });
 

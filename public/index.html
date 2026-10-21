@@ -79,12 +79,23 @@
 
   <!-- mobile nav overlay -->
   <div class="mnav" id="mnav">
-    <button class="x" onclick="closeNav()">&times;</button>
-    <a href="#how" onclick="closeNav()">How it works</a>
-    <a href="#why" onclick="closeNav()">Why Scrabl</a>
-    <a href="#faq" onclick="closeNav()">FAQ</a>
-    <a href="signup.html#login">Log in</a>
-    <a href="signup.html">Sign up</a>
+    <div class="mnav-top">
+      <a href="index.html" class="mnav-logo">
+        <span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></span>
+        scrabl
+      </a>
+      <button class="mnav-x" onclick="closeNav()" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+    </div>
+    <nav class="mnav-links">
+      <a href="#how" onclick="closeNav()" class="m-item"><span class="mi-n">01</span><span class="mi-t">How it works</span><span class="mi-a">&rarr;</span></a>
+      <a href="#why" onclick="closeNav()" class="m-item"><span class="mi-n">02</span><span class="mi-t">Why Scrabl</span><span class="mi-a">&rarr;</span></a>
+      <a href="#faq" onclick="closeNav()" class="m-item"><span class="mi-n">03</span><span class="mi-t">FAQ</span><span class="mi-a">&rarr;</span></a>
+      <a href="signup.html#login" class="m-item"><span class="mi-n">04</span><span class="mi-t">Log in</span><span class="mi-a">&rarr;</span></a>
+    </nav>
+    <div class="mnav-foot">
+      <a href="signup.html" class="mnav-cta">Get started free</a>
+      <div class="mnav-sig"><span class="dot"></span>Made in Akwa Ibom · #scrabl26</div>
+    </div>
   </div>
 
   <!-- ===================== HERO ===================== -->

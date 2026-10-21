@@ -5,8 +5,8 @@
    ========================================================= */
 
 /* ---- mobile nav ---- */
-function openNav(){ document.getElementById('mnav').classList.add('open'); }
-function closeNav(){ document.getElementById('mnav').classList.remove('open'); }
+function openNav(){ document.getElementById('mnav').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeNav(){ document.getElementById('mnav').classList.remove('open'); document.body.style.overflow=''; }
 
 /* ---- testimonials ("Before We Launch") ---- */
 var TESTIMONIALS = [

@@ -10,6 +10,53 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="landing.css">
+  <style>
+    /* custom scrollbar — Scrabl dark/gold (inline so CSS caching can't hide it) */
+    *{scrollbar-width:thin;scrollbar-color:#2e2e34 transparent}
+    ::-webkit-scrollbar{width:10px;height:10px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:#2e2e34;border-radius:8px;border:2px solid #0A0A0B}
+    ::-webkit-scrollbar-thumb:hover{background:#D4AF37}
+
+    /* ===== How-it-works animated demo ===== */
+    .wd-ov{position:fixed;inset:0;z-index:2000;background:rgba(6,6,8,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px}
+    .wd-ov.open{display:flex}
+    .wd-modal{position:relative;width:100%;max-width:430px;background:#0d0d10;border:1px solid #26262b;border-radius:22px;padding:24px 20px;box-shadow:0 30px 90px rgba(0,0,0,.6);font-family:'Outfit',sans-serif}
+    .wd-close{position:absolute;top:13px;right:16px;background:none;border:0;color:#8a8a93;font-size:27px;line-height:1;cursor:pointer;z-index:3}
+    .wd-close:hover{color:#e8e8ea}
+    .wd-dots{display:flex;gap:6px;justify-content:center;margin-bottom:20px}
+    .wd-dots i{width:24px;height:3px;border-radius:3px;background:#2a2a30;transition:.35s}
+    .wd-dots i.on{background:#D4AF37}
+    .wd-stage{position:relative;min-height:320px}
+    .wd-scene{position:absolute;inset:0;opacity:0;transform:translateY(10px);transition:opacity .45s,transform .45s;pointer-events:none;display:flex;flex-direction:column}
+    .wd-scene.on{opacity:1;transform:none;pointer-events:auto}
+    .wd-kicker{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#D4AF37;margin-bottom:13px;font-weight:600}
+    .wd-inbox{background:#141416;border:1px solid #26262b;border-radius:14px;padding:16px;min-height:118px;color:#e8e8ea;font-size:1.02rem;line-height:1.5}
+    .wd-caret{display:inline-block;width:2px;height:1.05em;background:#D4AF37;margin-left:1px;vertical-align:-2px;animation:wdblink 1s step-end infinite}
+    @keyframes wdblink{50%{opacity:0}}
+    .wd-hint{margin-top:14px;font-size:.84rem;color:#8a8a93}
+    .wd-load{align-items:center;justify-content:center;text-align:center;gap:16px}
+    .wd-leaf{color:#D4AF37}
+    .wd-leaf svg{width:58px;height:58px}
+    .wd-leaf svg path{stroke-dasharray:100;stroke-dashoffset:100;animation:wddraw 2s ease-in-out infinite}
+    @keyframes wddraw{0%{stroke-dashoffset:100}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-100}}
+    .wd-loadtxt{color:#c9c9d0;font-size:1rem}
+    .wd-posts{gap:12px;overflow:auto}
+    .wd-post{background:#141416;border:1px solid #26262b;border-radius:14px;padding:14px 15px;opacity:0;transform:translateY(12px);transition:.5s}
+    .wd-post.in{opacity:1;transform:none}
+    .wd-pmeta{display:flex;align-items:center;gap:7px;font-size:.73rem;color:#9a9aa2;margin-bottom:8px}
+    .wd-pmeta .pd{width:6px;height:6px;border-radius:50%;background:#D4AF37}
+    .wd-ptext{color:#e8e8ea;font-size:.95rem;line-height:1.5}
+    .wd-cta{align-items:center;justify-content:center;text-align:center}
+    .wd-cta h3{font-size:1.45rem;color:#fff;font-weight:600;margin:6px 0 4px;line-height:1.25}
+    .wd-cta p{color:#9a9aa2;margin:0;font-size:.95rem}
+    .wd-foot{display:flex;gap:10px;justify-content:center;margin-top:20px}
+    .wd-btn{font-family:inherit;font-weight:600;font-size:.92rem;padding:11px 20px;border-radius:11px;cursor:pointer;border:0;text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+    .wd-btn.gold{background:#D4AF37;color:#0A0A0B}
+    .wd-btn.line{background:transparent;border:1px solid #33333a;color:#e8e8ea}
+    .wd-btn.line:hover{border-color:#D4AF37;color:#D4AF37}
+    .wd-watch{margin-top:38px;text-align:center}
+  </style>
 </head>
 <body>
 
@@ -48,7 +95,7 @@
       <p class="tag">Scrabl keeps your shelf full of ready-to-post content — so you show up every day without staring at a blank screen.</p>
       <div class="actions">
         <a href="signup.html" class="btn btn-gold">Get started free</a>
-        <a href="#how" class="btn btn-line">See how it works</a>
+        <a href="#how" class="btn btn-line" data-demo>See how it works</a>
       </div>
       <div class="shelf">
         <div class="slot">
@@ -95,6 +142,9 @@
         <div class="step"><div class="n">STEP 2</div><h3>Scrabl stocks it</h3><p>Raw thoughts become ready-to-post content. The shelf keeps refilling.</p></div>
         <div class="step"><div class="n">STEP 3</div><h3>Pick one, post</h3><p>No blank screen, no overthinking. Your next post is already waiting.</p></div>
         <div class="step"><div class="n">STEP 4</div><h3>Keep the streak</h3><p>Showing up daily stops taking willpower. The habit builds itself.</p></div>
+      </div>
+      <div class="wd-watch">
+        <a href="#" class="btn btn-gold" data-demo><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" style="margin-right:7px;vertical-align:-3px"><path d="M8 5v14l11-7z"/></svg>Watch how it works</a>
       </div>
     </div>
   </section>
@@ -227,6 +277,78 @@
       <a href="signup.html" class="btn btn-gold">Get started free</a>
     </div>
   </section>
+
+  <!-- ===================== HOW-IT-WORKS DEMO ===================== -->
+  <div class="wd-ov" id="wdOv" aria-hidden="true">
+    <div class="wd-modal" role="dialog" aria-label="How Scrabl works">
+      <button class="wd-close" id="wdClose" aria-label="Close">&times;</button>
+      <div class="wd-dots"><i></i><i></i><i></i><i></i></div>
+      <div class="wd-stage">
+        <div class="wd-scene" data-s="0">
+          <div class="wd-kicker">1 · Drop a thought</div>
+          <div class="wd-inbox"><span id="wdType"></span><span class="wd-caret"></span></div>
+          <div class="wd-hint">A raw thought — exactly how it comes out of your head.</div>
+        </div>
+        <div class="wd-scene wd-load" data-s="1">
+          <div class="wd-leaf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path pathLength="100" d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path pathLength="100" d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></div>
+          <div class="wd-loadtxt">Shaping it in your voice…</div>
+        </div>
+        <div class="wd-scene wd-posts" data-s="2">
+          <div class="wd-kicker">3 · Post-ready, in your voice</div>
+          <div class="wd-post" data-i="0"><div class="wd-pmeta"><span class="pd"></span>X · ready</div><div class="wd-ptext">"omo Monday again 😮‍💨 who signed us up for work every single day? anyway — we move."</div></div>
+          <div class="wd-post" data-i="1"><div class="wd-pmeta"><span class="pd"></span>Instagram · ready</div><div class="wd-ptext">"monday has entered the chat 😩 nobody warned us adulthood was just work on repeat. still showing up tho 💪"</div></div>
+        </div>
+        <div class="wd-scene wd-cta" data-s="3">
+          <div class="wd-leaf" style="margin-bottom:4px"><svg viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></div>
+          <h3>Your voice. Every platform.<br>In seconds<span style="color:#D4AF37">.</span></h3>
+          <p>That's Scrabl. One thought in — a shelf of posts out.</p>
+        </div>
+      </div>
+      <div class="wd-foot">
+        <button class="wd-btn line" id="wdReplay">↺ Replay</button>
+        <a class="wd-btn gold" href="signup.html">Get started free</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    var ov=document.getElementById('wdOv'); if(!ov) return;
+    var scenes=ov.querySelectorAll('.wd-scene'), dots=ov.querySelectorAll('.wd-dots i');
+    var typeEl=document.getElementById('wdType'), posts=ov.querySelectorAll('.wd-post');
+    var raw="monday again... do we really have to work every single day 😩", timers=[];
+    function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+    function show(i){
+      scenes.forEach(function(s){ s.classList.toggle('on', +s.getAttribute('data-s')===i); });
+      dots.forEach(function(d,di){ d.classList.toggle('on', di<=i); });
+    }
+    function typeText(cb){
+      typeEl.textContent=''; var chars=Array.from(raw), i=0;
+      (function tick(){
+        if(i<=chars.length){ typeEl.textContent=chars.slice(0,i).join(''); i++; timers.push(setTimeout(tick,45)); }
+        else if(cb){ timers.push(setTimeout(cb,700)); }
+      })();
+    }
+    function run(){
+      clearTimers(); posts.forEach(function(p){ p.classList.remove('in'); }); show(0);
+      typeText(function(){
+        show(1);
+        timers.push(setTimeout(function(){
+          show(2);
+          posts.forEach(function(p,pi){ timers.push(setTimeout(function(){ p.classList.add('in'); }, 250+pi*550)); });
+          timers.push(setTimeout(function(){ show(3); }, 2100));
+        }, 2100));
+      });
+    }
+    function open(){ ov.classList.add('open'); ov.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; run(); }
+    function close(){ ov.classList.remove('open'); ov.setAttribute('aria-hidden','true'); document.body.style.overflow=''; clearTimers(); }
+    document.getElementById('wdClose').addEventListener('click', close);
+    document.getElementById('wdReplay').addEventListener('click', run);
+    ov.addEventListener('click', function(e){ if(e.target===ov) close(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && ov.classList.contains('open')) close(); });
+    document.querySelectorAll('[data-demo]').forEach(function(b){ b.addEventListener('click', function(e){ e.preventDefault(); open(); }); });
+  })();
+  </script>
 
   <!-- ===================== FOOTER ===================== -->
   <footer>

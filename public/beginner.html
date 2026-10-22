@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start your Scrabl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{scrollbar-width:thin;scrollbar-color:#2e2e34 transparent}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#2e2e34;border-radius:8px;border:2px solid #0A0A0B}
+  ::-webkit-scrollbar-thumb:hover{background:#D4AF37}
+  :root{
+    --bg:#0A0A0B;--field:rgba(255,255,255,.02);--line:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.12);
+    --accent:#D4AF37;--accent-soft:rgba(212,175,55,.14);--text:#F4F4F5;--subtext:#86868B;--faint:#5A5A5F;--error:#E5484D;--ok:#3DD68C;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',system-ui,sans-serif}
+  html,body{min-height:100%}
+  body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;font-weight:300;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+
+  .top{padding:26px 6% 0;display:flex;flex-direction:column;align-items:center;gap:22px;border-bottom:1px solid var(--line);padding-bottom:26px}
+  .brand{display:flex;align-items:center;gap:8px}
+  .brand .leaf{display:flex;align-items:center;justify-content:center;color:var(--accent)}
+  .brand .leaf svg{width:21px;height:21px}
+  .brand-name{font-size:1.2rem;font-weight:600;letter-spacing:-.02em}
+  .dots{display:flex;gap:9px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--line-2);transition:.3s}
+  .dot.done{background:var(--accent)}
+  .dot.current{background:var(--accent);transform:scale(1.35)}
+
+  .stage{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:52px 24px 80px}
+  .col{width:100%;max-width:560px}
+  .step{display:none;animation:fade .35s ease}
+  .step.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  .eyebrow{font-size:.74rem;color:var(--faint);font-weight:500;letter-spacing:.16em;text-transform:uppercase;margin-bottom:14px}
+  h1{font-size:1.9rem;font-weight:500;letter-spacing:-.03em;line-height:1.1}
+  h1 .dot-g{color:var(--accent)}
+  .sub{color:var(--subtext);font-size:1rem;font-weight:300;margin-top:12px;margin-bottom:30px;line-height:1.55}
+  .sub em{font-style:normal;color:var(--text)}
+
+  /* niche cards */
+  .niche-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .niche-card{text-align:left;background:var(--field);border:1.5px solid var(--line-2);border-radius:14px;padding:16px 16px;cursor:pointer;transition:.15s;color:var(--text);font-family:inherit}
+  .niche-card:hover{border-color:var(--subtext)}
+  .niche-card.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .niche-card .nc-t{font-weight:600;font-size:1rem;margin-bottom:4px}
+  .niche-card.sel .nc-t{color:var(--accent)}
+  .niche-card .nc-w{font-size:.82rem;color:var(--subtext);font-weight:300;line-height:1.45}
+  .niche-hint{font-size:.82rem;color:var(--faint);margin-top:14px}
+  @media(max-width:560px){.niche-grid{grid-template-columns:1fr}}
+
+  /* chips */
+  .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .chip{padding:10px 17px;background:var(--field);border:1px solid var(--line-2);border-radius:100px;color:var(--text);font-size:.9rem;font-weight:300;cursor:pointer;transition:.15s;user-select:none}
+  .chip:hover{border-color:var(--subtext)}
+  .chip.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:500}
+
+  .other-wrap{margin-top:14px;display:none}
+  .other-wrap.show{display:block}
+  .other-wrap input{width:100%;padding:13px 15px;background:var(--field);border:1px solid var(--line-2);border-radius:12px;color:var(--text);font-size:.92rem;font-weight:300;outline:none;transition:.2s}
+  .other-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+
+  /* voice textareas */
+  .vfield{margin-bottom:16px}
+  .vlabel{display:block;font-size:.88rem;color:var(--text);font-weight:400;margin-bottom:8px}
+  .voice-ta{width:100%;min-height:76px;resize:vertical;padding:14px 16px;background:var(--field);border:1px solid var(--line-2);border-radius:12px;color:var(--text);font-size:.92rem;font-weight:300;line-height:1.5;outline:none;transition:.2s}
+  .voice-ta::placeholder{color:var(--faint)}
+  .voice-ta:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .reassure{font-size:.82rem;color:var(--faint);margin-top:4px}
+
+  /* nav */
+  .nav-row{display:flex;align-items:center;gap:12px;margin-top:32px}
+  .back-btn{background:none;border:1px solid var(--line-2);color:var(--subtext);padding:13px 22px;border-radius:10px;cursor:pointer;font-size:.95rem;font-weight:400;transition:.2s}
+  .back-btn:hover{color:var(--text);border-color:var(--subtext)}
+  .back-btn[hidden]{display:none}
+  .cont-btn{flex:1;padding:14px;border:none;border-radius:10px;font-size:.98rem;font-weight:500;cursor:pointer;background:var(--accent);color:#111;transition:.2s}
+  .cont-btn:hover:not(:disabled){background:#E4C76A;transform:translateY(-1px)}
+  .cont-btn:disabled{opacity:.4;cursor:default}
+
+  /* building */
+  .building{display:none;text-align:center;padding:66px 0;animation:fade .4s ease}
+  .building.show{display:block}
+  .build-ring{width:54px;height:54px;border:3px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;margin:0 auto 26px;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .building h2{font-size:1.6rem;font-weight:500}
+  .building p{color:var(--subtext);margin-top:10px;font-weight:300}
+  .build-retry{display:none;margin-top:22px;background:none;border:1px solid var(--line-2);color:var(--subtext);padding:12px 26px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:.95rem}
+
+  /* starter kit */
+  .kit-screen{display:none;animation:fade .4s ease}
+  .kit-screen.show{display:block}
+  .kit-plat{border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px;background:var(--field)}
+  .kit-plat h3{color:var(--accent);font-size:1.12rem;font-weight:600;margin-bottom:16px}
+  .kit-field{margin-bottom:17px}
+  .kit-field:last-child{margin-bottom:0}
+  .kit-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.11em;color:var(--faint);font-weight:500;margin-bottom:9px}
+  .kit-opts{display:flex;flex-wrap:wrap;gap:8px}
+  .kit-opt{background:var(--bg);border:1px solid var(--line-2);color:var(--text);border-radius:8px;padding:8px 12px;font-size:.9rem;cursor:pointer;transition:.15s;font-family:inherit}
+  .kit-opt:hover{border-color:var(--accent);color:var(--accent)}
+  .kit-text{background:var(--bg);border:1px solid var(--line-2);border-radius:10px;padding:13px 15px;font-size:.92rem;line-height:1.55;white-space:pre-wrap;color:var(--text)}
+  .kit-copy{background:none;border:1px solid var(--line-2);color:var(--subtext);border-radius:8px;padding:7px 13px;font-size:.78rem;cursor:pointer;font-family:inherit;transition:.15s;margin-top:9px}
+  .kit-copy:hover{border-color:var(--accent);color:var(--accent)}
+  .kit-enter{display:block;width:100%;text-align:center;padding:16px;background:var(--accent);color:#111;text-decoration:none;border-radius:12px;font-weight:600;margin-top:8px;transition:.2s}
+  .kit-enter:hover{background:#E4C76A;transform:translateY(-1px)}
+
+  @media (max-width:480px){
+    h1{font-size:1.65rem}.sub{font-size:.95rem}.stage{padding:38px 20px 70px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+  <div class="top">
+    <div class="brand">
+      <span class="leaf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></span>
+      <span class="brand-name">scrabl</span>
+    </div>
+    <div class="dots" id="dots"><div class="dot current"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+
+  <div class="stage">
+    <div class="col">
+
+      <!-- STEP 1: niche -->
+      <div class="step active" data-step="1">
+        <div class="eyebrow">Step 1 of 3</div>
+        <h1>What do you want to be known for<span class="dot-g">?</span></h1>
+        <p class="sub">Pick a lane that's actually moving right now. Not sure? Choose what excites you — you can change it anytime. <em>Pick 1–2.</em></p>
+        <div class="niche-grid" id="niche-grid">
+          <button type="button" class="niche-card" data-niche="Faith & Motivation"><div class="nc-t">Faith &amp; Motivation</div><div class="nc-w">Huge, loyal audiences across Africa — and underserved.</div></button>
+          <button type="button" class="niche-card" data-niche="Comedy & Skits"><div class="nc-t">Comedy &amp; Skits</div><div class="nc-w">The fastest lane to blow up on TikTok &amp; IG.</div></button>
+          <button type="button" class="niche-card" data-niche="Tech & Making Money Online"><div class="nc-t">Tech &amp; Money Online</div><div class="nc-w">Everyone wants in. High-value and growing fast.</div></button>
+          <button type="button" class="niche-card" data-niche="Relationships & Dating"><div class="nc-t">Relationships</div><div class="nc-w">Endlessly shareable, always trending.</div></button>
+          <button type="button" class="niche-card" data-niche="Fashion & Thrift"><div class="nc-t">Fashion &amp; Thrift</div><div class="nc-w">Visual, local, and booming right now.</div></button>
+          <button type="button" class="niche-card" data-niche="Food & Cooking"><div class="nc-t">Food &amp; Cooking</div><div class="nc-w">Universal, easy to start, people save it.</div></button>
+          <button type="button" class="niche-card" data-niche="Fitness & Gym"><div class="nc-t">Fitness &amp; Gym</div><div class="nc-w">Motivation content travels far and wide.</div></button>
+          <button type="button" class="niche-card" data-niche="Beauty & Skincare"><div class="nc-t">Beauty &amp; Skincare</div><div class="nc-w">High engagement, strong following.</div></button>
+          <button type="button" class="niche-card" data-niche="Student & Study Life"><div class="nc-t">Student Life</div><div class="nc-w">Relatable to a massive young audience.</div></button>
+          <button type="button" class="niche-card" data-niche="Football & Sports Takes"><div class="nc-t">Football &amp; Sports</div><div class="nc-w">Daily content, passionate fans.</div></button>
+          <button type="button" class="niche-card" data-niche="Music & Afrobeats"><div class="nc-t">Music &amp; Afrobeats</div><div class="nc-w">Culture-first, with global reach.</div></button>
+          <button type="button" class="niche-card" data-niche="Other" data-other="true"><div class="nc-t">Something else</div><div class="nc-w">Tell us your own lane.</div></button>
+        </div>
+        <div class="other-wrap" id="niche-other-wrap"><input type="text" id="niche-other-input" placeholder="What do you want to create about?"></div>
+        <div class="niche-hint" id="niche-hint"></div>
+        <div class="nav-row">
+          <button type="button" class="cont-btn" data-cont disabled>Continue</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: platforms -->
+      <div class="step" data-step="2">
+        <div class="eyebrow">Step 2 of 3</div>
+        <h1>Where do you want to start<span class="dot-g">?</span></h1>
+        <p class="sub">Pick the platforms you want accounts on. Scrabl will set each one up for you — name, username, bio and your first post.</p>
+        <div class="chips" id="plats">
+          <div class="chip plat-chip" data-plat="TikTok">TikTok</div>
+          <div class="chip plat-chip" data-plat="Instagram">Instagram</div>
+          <div class="chip plat-chip" data-plat="X / Twitter">X / Twitter</div>
+          <div class="chip plat-chip" data-plat="YouTube">YouTube</div>
+          <div class="chip plat-chip" data-plat="LinkedIn">LinkedIn</div>
+          <div class="chip plat-chip" data-plat="Facebook">Facebook</div>
+          <div class="chip plat-chip" data-plat="Threads">Threads</div>
+        </div>
+        <div class="nav-row">
+          <button type="button" class="back-btn" data-back>Back</button>
+          <button type="button" class="cont-btn" data-cont disabled>Continue</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: voice (no posts needed) -->
+      <div class="step" data-step="3">
+        <div class="eyebrow">Step 3 of 3</div>
+        <h1>Now — how do you talk<span class="dot-g">?</span></h1>
+        <p class="sub">Forget "posting." Just write like you'd text your best friend. This is how Scrabl learns your real voice — no old posts needed. <em>Fill at least two.</em></p>
+        <div class="vfield">
+          <label class="vlabel">Tell us about your day, the way you'd text a friend.</label>
+          <textarea class="voice-ta" placeholder="omo today was something else…"></textarea>
+        </div>
+        <div class="vfield">
+          <label class="vlabel">What's something you could talk about for hours?</label>
+          <textarea class="voice-ta" placeholder="don't overthink it, just talk…"></textarea>
+        </div>
+        <div class="vfield">
+          <label class="vlabel">Hype up something you're into right now.</label>
+          <textarea class="voice-ta" placeholder="gas it up like you're telling your group chat…"></textarea>
+        </div>
+        <p class="reassure">The realer, the better. Don't clean it up.</p>
+        <div class="nav-row">
+          <button type="button" class="back-btn" data-back>Back</button>
+          <button type="button" class="cont-btn" data-cont data-finish disabled>Build my launchpad</button>
+        </div>
+      </div>
+
+      <!-- BUILDING -->
+      <div class="building" id="building">
+        <div class="build-ring" id="build-spin"></div>
+        <h2 id="build-title">Setting up your voice<span class="dot-g">.</span></h2>
+        <p id="build-msg">Scrabl is learning how you talk. One sec…</p>
+        <button type="button" class="build-retry" id="build-retry">Try again</button>
+      </div>
+
+      <!-- STARTER KIT -->
+      <div class="kit-screen" id="kitScreen">
+        <div class="eyebrow">Your launchpad</div>
+        <h1>You're a creator now<span class="dot-g">.</span></h1>
+        <p class="sub" id="kit-sub">Here's everything to start — per platform, in that platform's style.</p>
+        <div id="kitList"></div>
+        <a href="app.html" class="kit-enter">Enter Scrabl</a>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  var backendBase = (location.hostname==='localhost'||location.hostname==='127.0.0.1') ? 'http://localhost:5500' : '';
+  var token=''; try{ token=localStorage.getItem('scrabl_token')||''; }catch(_){}
+  if(!token){ location.href='signup.html#login'; return; }
+
+  var TOTAL=3, current=1;
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.step'));
+  var dots  = Array.prototype.slice.call(document.querySelectorAll('#dots .dot'));
+  var NICHE_LIMIT=2;
+
+  function showStep(n){
+    current=n;
+    steps.forEach(function(s){ s.classList.toggle('active', +s.getAttribute('data-step')===n); });
+    dots.forEach(function(d,i){ d.classList.toggle('done', i<n-1); d.classList.toggle('current', i===n-1); });
+    window.scrollTo({top:0,behavior:'smooth'});
+    refresh();
+  }
+
+  // niche cards
+  document.querySelectorAll('.niche-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      var isOther = card.getAttribute('data-other')==='true';
+      if(card.classList.contains('sel')){ card.classList.remove('sel'); }
+      else {
+        if(document.querySelectorAll('.niche-card.sel').length >= NICHE_LIMIT){
+          var h=document.getElementById('niche-hint'); h.textContent='Pick up to two — keeps you focused.';
+          setTimeout(function(){ h.textContent=''; }, 1600);
+          return;
+        }
+        card.classList.add('sel');
+      }
+      if(isOther){ document.getElementById('niche-other-wrap').classList.toggle('show', card.classList.contains('sel')); }
+      refresh();
+    });
+  });
+  document.getElementById('niche-other-input').addEventListener('input', refresh);
+
+  // platforms
+  document.querySelectorAll('.plat-chip').forEach(function(chip){
+    chip.addEventListener('click', function(){ chip.classList.toggle('sel'); refresh(); });
+  });
+
+  // voice
+  document.querySelectorAll('.voice-ta').forEach(function(ta){ ta.addEventListener('input', refresh); });
+  function filledVoice(){
+    return Array.prototype.slice.call(document.querySelectorAll('.voice-ta'))
+      .map(function(t){ return t.value.trim(); }).filter(function(v){ return v.length>0; });
+  }
+
+  function nicheTitles(){
+    return Array.prototype.slice.call(document.querySelectorAll('.niche-card.sel')).map(function(c){
+      if(c.getAttribute('data-other')==='true'){ return document.getElementById('niche-other-input').value.trim(); }
+      return c.getAttribute('data-niche');
+    }).filter(Boolean);
+  }
+  function platformNames(){
+    return Array.prototype.slice.call(document.querySelectorAll('.plat-chip.sel')).map(function(c){ return c.getAttribute('data-plat'); });
+  }
+
+  function valid(n){
+    if(n===1) return nicheTitles().length>=1;
+    if(n===2) return platformNames().length>=1;
+    if(n===3) return filledVoice().length>=2;
+    return false;
+  }
+  function refresh(){
+    var cont = steps[current-1] ? steps[current-1].querySelector('[data-cont]') : null;
+    if(cont) cont.disabled = !valid(current);
+  }
+
+  document.querySelectorAll('[data-cont]').forEach(function(b){
+    b.addEventListener('click', function(){
+      if(!valid(current)) return;
+      if(b.hasAttribute('data-finish')){ finish(); return; }
+      if(current<TOTAL) showStep(current+1);
+    });
+  });
+  document.querySelectorAll('[data-back]').forEach(function(b){
+    b.addEventListener('click', function(){ if(current>1) showStep(current-1); });
+  });
+
+  // ---------- finish ----------
+  var payload={};
+  function collect(){
+    payload = { mode:'beginner', niche:nicheTitles(), platforms:platformNames(), voiceSamples:filledVoice() };
+    return payload;
+  }
+  function showBuilding(msg){
+    document.querySelector('.top').style.display='none';
+    steps.forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById('kitScreen').classList.remove('show');
+    document.getElementById('build-spin').style.display='';
+    document.getElementById('build-retry').style.display='none';
+    document.getElementById('build-title').innerHTML='Setting up your voice<span class="dot-g">.</span>';
+    document.getElementById('build-msg').textContent = msg;
+    document.getElementById('building').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function finish(){
+    collect();
+    showBuilding('Scrabl is learning how you talk. One sec…');
+    saveOnboarding(0);
+  }
+  function saveOnboarding(attempt){
+    fetch(backendBase+'/api/onboarding',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({profile:payload})})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,status:r.status,d:d}; }, function(){ return {ok:r.ok,status:r.status,d:null}; }); })
+    .then(function(r){
+      if(r.ok){
+        try{ localStorage.setItem('scrabl_onboarding', JSON.stringify(payload)); }catch(_){}
+        document.getElementById('build-msg').textContent='Building your launchpad…';
+        buildKit(0);
+      } else if(r.status===401){ location.href='signup.html#login'; }
+      else if(attempt<2){ setTimeout(function(){ saveOnboarding(attempt+1); }, 1600); }
+      else { buildFailed((r.d&&r.d.error)||'We could not set you up just now.'); }
+    })
+    .catch(function(){
+      if(attempt<2){ setTimeout(function(){ saveOnboarding(attempt+1); }, 1600); }
+      else { buildFailed('Could not reach the server. Check your connection and try again.'); }
+    });
+  }
+  function buildKit(attempt){
+    fetch(backendBase+'/api/starter-kit',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({niche:payload.niche.join(', '), platforms:payload.platforms, voiceSamples:payload.voiceSamples})})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,status:r.status,d:d}; }, function(){ return {ok:r.ok,status:r.status,d:null}; }); })
+    .then(function(r){
+      if(r.ok && r.d && r.d.platforms){ renderKit(r.d.platforms); }
+      else if((r.status===503||r.status===429) && attempt<2){ setTimeout(function(){ buildKit(attempt+1); }, 1800); }
+      else { renderKit(null); }  // they're already onboarded; kit is a bonus
+    })
+    .catch(function(){ if(attempt<2){ setTimeout(function(){ buildKit(attempt+1); }, 1800); } else { renderKit(null); } });
+  }
+  function buildFailed(msg){
+    document.getElementById('build-spin').style.display='none';
+    document.getElementById('build-title').innerHTML='Almost there<span class="dot-g">.</span>';
+    document.getElementById('build-msg').textContent=msg;
+    document.getElementById('build-retry').style.display='inline-block';
+  }
+  document.getElementById('build-retry').addEventListener('click', function(){
+    document.getElementById('build-spin').style.display='';
+    this.style.display='none';
+    document.getElementById('build-title').innerHTML='Setting up your voice<span class="dot-g">.</span>';
+    document.getElementById('build-msg').textContent='Trying again…';
+    saveOnboarding(0);
+  });
+
+  function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  function renderKit(platforms){
+    document.getElementById('building').classList.remove('show');
+    var wrap=document.getElementById('kitList'); wrap.innerHTML='';
+    if(platforms){
+      Object.keys(platforms).forEach(function(pname){
+        var k=platforms[pname]; if(!k) return;
+        var names=(k.names||[]).map(function(n){ return '<button type="button" class="kit-opt" data-copy="'+esc(n)+'">'+esc(n)+'</button>'; }).join('');
+        var users=(k.usernames||[]).map(function(u){ var uu=String(u).replace(/^@+/,''); return '<button type="button" class="kit-opt" data-copy="'+esc(uu)+'">@'+esc(uu)+'</button>'; }).join('');
+        var card=document.createElement('div'); card.className='kit-plat';
+        card.innerHTML =
+          '<h3>'+esc(pname)+'</h3>'+
+          '<div class="kit-field"><div class="kit-label">Display name</div><div class="kit-opts">'+names+'</div></div>'+
+          '<div class="kit-field"><div class="kit-label">Username</div><div class="kit-opts">'+users+'</div></div>'+
+          '<div class="kit-field"><div class="kit-label">Bio</div><div class="kit-text">'+esc(k.bio||'')+'</div><button type="button" class="kit-copy" data-copy="'+esc(k.bio||'')+'">Copy bio</button></div>'+
+          '<div class="kit-field"><div class="kit-label">Your first post</div><div class="kit-text">'+esc(k.firstPost||'')+'</div><button type="button" class="kit-copy" data-copy="'+esc(k.firstPost||'')+'">Copy post</button></div>';
+        wrap.appendChild(card);
+      });
+      document.getElementById('kit-sub').textContent='Tap any name or username to copy. Create each account, paste it in, and post your first one.';
+    } else {
+      var p=document.createElement('p'); p.className='sub'; p.style.textAlign='left';
+      p.textContent="Your voice is locked in and you're in — we couldn't build your starter kit just now, but you can generate posts right away inside Scrabl.";
+      wrap.appendChild(p);
+    }
+    wrap.querySelectorAll('[data-copy]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var t=b.getAttribute('data-copy');
+        try{ if(navigator.clipboard) navigator.clipboard.writeText(t); }catch(_){}
+        var old=b.textContent; b.textContent='Copied ✓';
+        setTimeout(function(){ b.textContent=old; }, 1100);
+      });
+    });
+    document.getElementById('kitScreen').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  showStep(1);
+})();
+</script>
+</body>
+</html>

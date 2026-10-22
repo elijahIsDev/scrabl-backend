@@ -123,6 +123,30 @@
   .done-screen .retry-btn{display:none;margin-top:6px;background:none;border:1px solid var(--line-2);color:var(--subtext);padding:12px 26px;border-radius:10px;cursor:pointer;font-size:.95rem;font-weight:400}
   .done-screen.failed .retry-btn{display:inline-block}
 
+  /* Beginner | Creator chooser */
+  .chooser{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:40px 24px;overflow:auto}
+  .chooser.hidden{display:none}
+  .chooser-inner{width:100%;max-width:760px}
+  .chooser h1{text-align:center}
+  .chooser .sub{text-align:center;max-width:470px;margin-left:auto;margin-right:auto}
+  .choice-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:34px}
+  .choice{display:flex;flex-direction:column;align-items:flex-start;gap:12px;text-align:left;background:var(--field);border:1.5px solid var(--line-2);border-radius:18px;padding:22px 22px 24px;cursor:pointer;transition:.2s;color:var(--text);font-family:inherit}
+  .choice:hover{border-color:var(--subtext)}
+  .choice.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .choice-head{display:flex;align-items:center;justify-content:space-between;width:100%}
+  .choice-ico{color:var(--accent)}
+  .choice-ico svg{width:28px;height:28px}
+  .choice-radio{width:22px;height:22px;border-radius:50%;border:2px solid var(--line-2);flex-shrink:0;position:relative;transition:.2s}
+  .choice.sel .choice-radio{border-color:var(--accent);background:var(--accent)}
+  .choice.sel .choice-radio::after{content:"";position:absolute;inset:0;margin:auto;width:8px;height:8px;border-radius:50%;background:#111}
+  .choice-t{font-size:1.22rem;font-weight:600;letter-spacing:-.02em}
+  .choice-d{font-size:.9rem;color:var(--subtext);font-weight:300;line-height:1.55}
+  .choice.sel .choice-t{color:var(--accent)}
+  .chooser-cta{display:block;width:100%;max-width:320px;margin:30px auto 0;padding:15px;border:none;border-radius:12px;background:var(--accent);color:#111;font-family:inherit;font-weight:600;font-size:1rem;cursor:pointer;transition:.2s}
+  .chooser-cta:hover:not(:disabled){background:#E4C76A;transform:translateY(-1px)}
+  .chooser-cta:disabled{opacity:.4;cursor:default}
+  @media (max-width:560px){ .choice-cards{grid-template-columns:1fr} }
+
   @media (max-width:480px){
     h1{font-size:1.65rem}
     .sub{font-size:.95rem}
@@ -132,6 +156,37 @@
 </style>
 </head>
 <body>
+
+  <!-- Beginner | Creator chooser -->
+  <div class="chooser" id="chooser">
+    <div class="chooser-inner">
+      <div class="brand" style="justify-content:center;margin-bottom:18px">
+        <span class="leaf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></span>
+        <span class="brand-name">scrabl</span>
+      </div>
+      <h1>How are you joining Scrabl<span class="dot-g">?</span></h1>
+      <p class="sub">Pick where you're starting from. You can switch later.</p>
+      <div class="choice-cards">
+        <button type="button" class="choice" data-choice="beginner">
+          <span class="choice-head">
+            <span class="choice-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg></span>
+            <span class="choice-radio"></span>
+          </span>
+          <span class="choice-t">I'm a beginner</span>
+          <span class="choice-d">New to this — barely posted, or never have. Scrabl helps you find your niche, build your accounts from scratch, and make your first post.</span>
+        </button>
+        <button type="button" class="choice" data-choice="creator">
+          <span class="choice-head">
+            <span class="choice-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg></span>
+            <span class="choice-radio"></span>
+          </span>
+          <span class="choice-t">I'm a creator</span>
+          <span class="choice-d">You already post. Bring your voice and move fast — ideas in, post-ready content out. No hand-holding.</span>
+        </button>
+      </div>
+      <button type="button" class="chooser-cta" id="chooserCta" disabled>Select to continue</button>
+    </div>
+  </div>
 
   <div class="top">
     <div class="brand">
@@ -447,6 +502,7 @@
 
   // ---------- finish ----------
   function collect(){
+    data.mode = 'creator';
     data.voiceSamples = filledSamples();
     data.niche = selectedChips('niche').filter(function(v){ return v!=='Other'; });
     data.nicheOther = (document.querySelector('[data-otherwrap="niche"] input')||{}).value ? document.querySelector('[data-otherwrap="niche"] input').value.trim() : '';
@@ -535,7 +591,28 @@
     submitOnboarding(collect(), 0);
   });
 
-  showStep(1);
+  // ---------- Beginner | Creator chooser (select → confirm) ----------
+  var chooser = document.getElementById('chooser');
+  var chooserCta = document.getElementById('chooserCta');
+  var chosen = '';
+  var choiceCards = document.querySelectorAll('.choice');
+  choiceCards.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      chosen = btn.getAttribute('data-choice');
+      choiceCards.forEach(function(c){ c.classList.toggle('sel', c === btn); });
+      chooserCta.disabled = false;
+      chooserCta.textContent = (chosen === 'beginner') ? 'Continue as a beginner' : 'Continue as a creator';
+    });
+  });
+  chooserCta.addEventListener('click', function(){
+    if(!chosen) return;
+    if(chosen === 'beginner'){ window.location.href = 'beginner.html'; return; }
+    // Creator → run the existing flow unchanged
+    data.mode = 'creator';
+    if(chooser) chooser.classList.add('hidden');
+    showStep(1);
+  });
+  // (step flow starts only after a choice is confirmed)
 })();
 </script>
 </body>

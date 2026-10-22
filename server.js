@@ -147,6 +147,7 @@ const Feedback = mongoose.model('Feedback', feedbackSchema);
 const userSchema = new mongoose.Schema({
     name:         { type: String, default: '' },
     username:     { type: String, default: '', lowercase: true, trim: true },  // public @handle; uniqueness enforced in the route
+    mode:         { type: String, default: 'creator' },  // 'beginner' | 'creator' — chosen at onboarding
     email:        { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, default: '' },         // empty for Google-only accounts
     googleId:     { type: String, default: '' },         // Google 'sub' id when they use Continue with Google
@@ -775,6 +776,7 @@ app.post('/api/onboarding', async (req, res) => {
 
         // Save the profile first, so their samples are stored even if analysis needs a retry
         user.profile = profile;
+        if (profile.mode === 'beginner' || profile.mode === 'creator') user.mode = profile.mode;
         await user.save();
 
         // Analyze their voice — onboarding only completes if this succeeds
@@ -819,6 +821,7 @@ app.get('/api/me', async (req, res) => {
             email: user.email,
             name: user.name || '',
             username: user.username || '',
+            mode: user.mode || 'creator',
             avatar: user.avatar || '',
             recent: Array.isArray(user.recent) ? user.recent : [],
             notes: Array.isArray(user.notes) ? user.notes : [],
@@ -1065,6 +1068,72 @@ app.post('/api/voice/analyze', async (req, res) => {
     } catch (err) {
         console.error('Voice analyze error:', err);
         return res.status(500).json({ error: 'Voice analysis failed. Please try again.' });
+    }
+});
+
+// ========== BEGINNER LAUNCHPAD: build a from-scratch identity per platform ==========
+function buildStarterKitPrompt(niche, platforms, voiceSamples) {
+    const samples = (voiceSamples || []).filter(Boolean).slice(0, 4);
+    const voiceNote = samples.length
+        ? 'How this person writes casually (match their energy, do not copy verbatim):\n' + samples.map(s => '- ' + s).join('\n')
+        : 'No writing sample given — keep everything natural, warm and youthful, never corporate.';
+    return [
+        'You are helping a COMPLETE BEGINNER — often a young African / Nigerian creator — set up brand-new social media accounts FROM SCRATCH. They have never posted before.',
+        `Their chosen niche: ${niche}.`,
+        `Build a starter identity for EACH of these platforms: ${platforms.join(', ')}.`,
+        voiceNote,
+        '',
+        'Tailor EVERYTHING to how THAT platform actually works: TikTok = playful, short, trend-aware; Instagram = aesthetic and relatable; X/Twitter = punchy and witty; LinkedIn = professional but human; YouTube = clear and searchable; Facebook/Threads = warm and conversational.',
+        '',
+        'Return ONLY valid JSON (no markdown, no backticks) shaped EXACTLY like this:',
+        '{ "platforms": {',
+        '   "<platform name exactly as given>": {',
+        '     "names": ["3 display-name ideas for this platform"],',
+        '     "usernames": ["4 handle ideas: lowercase, no spaces, only letters/numbers/._ , no leading @"],',
+        '     "bio": "a ready-to-paste bio/description written natively for this platform, tasteful emojis where they fit",',
+        '     "firstPost": "their very first post, ready to publish, in this platform\'s native style"',
+        '   }',
+        ' } }',
+        '',
+        'Make the names and usernames brandable and natural (not obviously-taken famous brands). Make the bio and first post genuinely good and culturally natural — never corny, never generic AI filler.'
+    ].join('\n');
+}
+
+app.post('/api/starter-kit', async (req, res) => {
+    try {
+        const auth = req.headers.authorization || '';
+        const token = auth.startsWith('Bearer ') ? auth.slice(7) : (req.body?.token || '');
+        const payload = verifyToken(token);
+        if (!payload) return res.status(401).json({ error: 'Please log in again.' });
+        if (!geminiClient) return res.status(503).json({ error: geminiInitError || 'Gemini not initialized.' });
+
+        const niche = (req.body?.niche || '').toString().trim() || 'general creator';
+        let platforms = Array.isArray(req.body?.platforms) ? req.body.platforms.filter(Boolean).slice(0, 6) : [];
+        if (!platforms.length) return res.status(400).json({ error: 'Pick at least one platform first.' });
+        const voiceSamples = Array.isArray(req.body?.voiceSamples) ? req.body.voiceSamples.filter(Boolean).slice(0, 4) : [];
+
+        const prompt = buildStarterKitPrompt(niche, platforms, voiceSamples);
+        const result = await generateContentResilient(prompt);
+        const rawText = await extractGeminiRawText(result);
+        const parsed = parseVoiceJSON(rawText);
+        if (!parsed || !parsed.platforms) {
+            return res.status(502).json({ error: 'Could not build your starter kit right now. Please try again.' });
+        }
+
+        // Stash it on the profile so the kit isn't lost (best-effort; never blocks the response)
+        try {
+            const user = await User.findById(payload.id);
+            if (user) { user.profile = user.profile || {}; user.profile.starterKit = parsed.platforms; user.markModified('profile'); await user.save(); }
+        } catch (e) { console.error('Starter kit stash failed:', e && e.message); }
+
+        console.log('🚀 Starter kit built (' + platforms.join(', ') + ') for user ' + payload.id);
+        return res.status(200).json({ success: true, platforms: parsed.platforms });
+    } catch (err) {
+        console.error('Starter kit error:', err);
+        if (err && [429, 503].includes(err.status)) {
+            return res.status(503).json({ error: 'Our AI is a little busy. Give it a few seconds and try again.' });
+        }
+        return res.status(500).json({ error: 'Could not build your starter kit. Please try again.' });
     }
 });
 

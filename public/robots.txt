@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Keep the logged-in app pages out of search (they're behind login anyway)
+Disallow: /app.html
+Disallow: /onboarding.html
+Disallow: /beginner.html
+
+Sitemap: https://scrabl-backend.pxxlspace.cv/sitemap.xml
